@@ -1,0 +1,103 @@
+{
+  "EmployedAtGrad": {
+    "data_min": 0.167,
+    "data_max": 0.889,
+    "data_mean": 0.5781311475409836,
+    "data_median": 0.5854999999999999,
+    "min": 0.2,
+    "max": 1.0,
+    "step": 0.01,
+    "label": "Employed at Graduation",
+    "format": "percent"
+  },
+  "Employed3Mo": {
+    "data_min": 0.446,
+    "data_max": 0.982,
+    "data_mean": 0.8114180327868853,
+    "data_median": 0.8325,
+    "min": 0.2,
+    "max": 1.0,
+    "step": 0.01,
+    "label": "Employed 3 Months After",
+    "format": "percent"
+  },
+  "AvgSalaryBonus": {
+    "data_min": 50949.0,
+    "data_max": 206157.0,
+    "data_mean": 118161.2868852459,
+    "data_median": 108627.0,
+    "min": 80000,
+    "max": 220000,
+    "step": 1000,
+    "label": "Avg Salary + Bonus ($)",
+    "format": "dollar"
+  },
+  "MedianGPA": {
+    "data_min": 3.1,
+    "data_max": 3.8,
+    "data_mean": 3.5189839034302706,
+    "data_median": 3.5,
+    "min": 3.0,
+    "max": 4.0,
+    "step": 0.01,
+    "label": "Median GPA",
+    "format": "number"
+  },
+  "AcceptanceRate": {
+    "data_min": 0.027,
+    "data_max": 1.0,
+    "data_mean": 0.46765573770491803,
+    "data_median": 0.4255,
+    "min": 0.05,
+    "max": 1.0,
+    "step": 0.01,
+    "label": "Acceptance Rate",
+    "format": "percent"
+  },
+  "PeerScore": {
+    "data_min": 1.8,
+    "data_max": 4.8,
+    "data_mean": 3.2139344262295073,
+    "data_median": 3.1,
+    "min": 1.0,
+    "max": 5.0,
+    "step": 0.1,
+    "label": "Peer Assessment Score",
+    "format": "number"
+  },
+  "RecruiterScore": {
+    "data_min": 1.8,
+    "data_max": 4.6,
+    "data_mean": 3.300754551016187,
+    "data_median": 3.2966358649275636,
+    "min": 1.0,
+    "max": 5.0,
+    "step": 0.1,
+    "label": "Recruiter Assessment Score",
+    "format": "number"
+  },
+  "GMAT_Combined": {
+    "data_min": 465.0,
+    "data_max": 750.0,
+    "data_mean": 596.9363124034705,
+    "data_median": 585.0,
+    "min": 205,
+    "max": 805,
+    "step": 5,
+    "label": "GMAT Score (Combined)",
+    "format": "number"
+  },
+  "_gwu_current": {
+    "EmployedAtGrad": 0.477,
+    "Employed3Mo": 0.708,
+    "AvgSalaryBonus": 122929.0,
+    "MedianGPA": 3.3,
+    "AcceptanceRate": 0.251,
+    "PeerScore": 3.2,
+    "RecruiterScore": 3.4,
+    "GMAT_Combined": 594.2571230246386
+  },
+  "_gwu_school_name": "George Washington University",
+  "_gwu_current_rank": 69,
+  "_gwu_current_score": 51.0
+}

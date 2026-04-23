@@ -1,0 +1,23 @@
+{
+  "features": [
+    "EmployedAtGrad",
+    "Employed3Mo",
+    "AvgSalaryBonus",
+    "MedianGPA",
+    "AcceptanceRate",
+    "PeerScore",
+    "RecruiterScore",
+    "GMAT_Combined"
+  ],
+  "target": "OverallScore",
+  "log_vars": [
+    "AvgSalaryBonus",
+    "GMAT_Combined"
+  ],
+  "logit_vars": [
+    "EmployedAtGrad",
+    "Employed3Mo",
+    "AcceptanceRate"
+  ],
+  "inv_norm_vars": []
+}

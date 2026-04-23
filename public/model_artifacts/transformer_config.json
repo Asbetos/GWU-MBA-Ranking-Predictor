@@ -1,0 +1,13 @@
+{
+  "log_cols": [
+    "AvgSalaryBonus",
+    "GMAT_Combined"
+  ],
+  "logit_cols": [
+    "EmployedAtGrad",
+    "Employed3Mo",
+    "AcceptanceRate"
+  ],
+  "inv_norm_cols": [],
+  "rank_counts": {}
+}

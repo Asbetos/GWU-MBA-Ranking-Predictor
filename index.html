@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GWU MBA Ranking Predictor | What-If Scenario Planning</title>
+  <meta name="description" content="Interactive what-if scenario planning tool for predicting GWU's US News MBA ranking. Adjust 8 key variables and see real-time ranking predictions." />
+  <meta property="og:title" content="GWU MBA Ranking Predictor" />
+  <meta property="og:description" content="Predict how changes in key metrics affect GWU's US News MBA ranking using Monte Carlo simulation." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>" />
+  <link rel="stylesheet" href="/styles/index.css" />
+</head>
+<body class="min-h-screen">
+  <!-- Ambient background -->
+  <div class="fixed inset-0 -z-10">
+    <div class="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-3xl animate-pulse-slow"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="pt-8 pb-4 px-6">
+    <div class="max-w-7xl mx-auto text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-medium mb-4">
+        <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+        Monte Carlo Simulation Engine
+      </div>
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-3">
+        <span class="gradient-text">MBA Ranking</span>
+        <br />
+        <span class="text-white">Predictor</span>
+      </h1>
+      <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+        Adjust the 8 key variables below to simulate how changes affect
+        <span class="text-cyan-400 font-semibold" id="school-name">GWU's</span> predicted US News MBA ranking
+      </p>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="max-w-7xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <!-- Left: Sliders Panel -->
+      <div class="lg:col-span-7 space-y-4">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xl font-bold text-white">Input Variables</h2>
+          <button id="reset-btn" class="reset-btn">
+            ↺ Reset to Current
+          </button>
+        </div>
+
+        <div id="sliders-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Sliders injected by JS -->
+        </div>
+      </div>
+
+      <!-- Right: Results Panel -->
+      <div class="lg:col-span-5 space-y-6 lg:sticky lg:top-8 lg:self-start">
+
+        <!-- Predicted Rank Card -->
+        <div class="glass-panel p-8 text-center" id="rank-card">
+          <p class="text-gray-400 text-sm uppercase tracking-widest mb-2">Predicted Rank</p>
+          <div id="rank-display" class="rank-display mb-2">#—</div>
+          <p class="text-gray-500 text-sm" id="rank-subtitle">Move sliders to predict</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="stat-card" id="score-card">
+            <p class="text-gray-400 text-xs uppercase tracking-widest mb-1">Scenario Score</p>
+            <p class="text-3xl font-bold text-white" id="scenario-score">—</p>
+          </div>
+          <div class="stat-card" id="ci-card">
+            <p class="text-gray-400 text-xs uppercase tracking-widest mb-1">90% CI Range</p>
+            <p class="text-3xl font-bold text-white" id="ci-range">—</p>
+          </div>
+        </div>
+
+        <!-- Confidence Bar -->
+        <div class="glass-panel p-5">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-gray-400 text-sm">Rank Confidence Interval</p>
+            <p class="text-xs text-gray-500" id="ci-label">—</p>
+          </div>
+          <div class="confidence-bar">
+            <div class="confidence-fill" id="ci-fill" style="left: 0%; width: 0%"></div>
+          </div>
+          <div class="flex justify-between mt-2">
+            <span class="text-xs text-green-400" id="ci-best">—</span>
+            <span class="text-xs text-amber-400" id="ci-worst">—</span>
+          </div>
+        </div>
+
+        <!-- Rank Distribution Chart -->
+        <div class="glass-panel p-5">
+          <p class="text-gray-400 text-sm mb-3">Rank Distribution</p>
+          <canvas id="rankChart"></canvas>
+        </div>
+
+        <!-- Current GWU Info -->
+        <div class="glass-panel p-5" id="current-info">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+            <p class="text-gray-400 text-sm">Current Standing</p>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-white font-semibold" id="current-school-name">George Washington University</p>
+              <p class="text-gray-500 text-sm" id="current-score-label">Score: —</p>
+            </div>
+            <div class="text-right">
+              <p class="text-3xl font-bold text-cyan-400" id="current-rank">#—</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="max-w-7xl mx-auto px-6 py-8 mt-8 border-t border-white/5">
+    <p class="text-center text-gray-600 text-sm">
+      Built with 1000-iteration bootstrapped ElasticNetCV · Monte Carlo rank simulation
+    </p>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

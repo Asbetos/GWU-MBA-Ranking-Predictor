@@ -1,0 +1,21 @@
+{
+  "name": "gwu-ranking-predictor",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "npx vite --port 3000",
+    "build": "npx vite build",
+    "preview": "npx vite preview --port 4000"
+  },
+  "keywords": ["mba", "ranking", "predictor", "gwu"],
+  "author": "",
+  "license": "ISC",
+  "description": "Interactive what-if scenario planning for US News MBA rankings",
+  "dependencies": {
+    "autoprefixer": "^10.5.0",
+    "chart.js": "^4.5.1",
+    "postcss": "^8.5.10",
+    "tailwindcss": "^3.4.19",
+    "vite": "^8.0.10"
+  }
+}
