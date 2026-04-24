@@ -143,7 +143,7 @@ function predictScore(row) {
  * @param {number} nSimulations - Number of Monte Carlo iterations
  * @returns {Object} Results including medianRank, CI, score, distribution
  */
-export function simulateRank(customMetrics, targetSchool = null, nSimulations = 5000) {
+export function simulateRank(customMetrics, targetSchool = null, nSimulations = 10000) {
   if (!dataSnapshot || !modelWeights) {
     throw new Error('Model not loaded. Call loadModel() first.');
   }

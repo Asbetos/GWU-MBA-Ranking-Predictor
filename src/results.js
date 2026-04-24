@@ -44,7 +44,7 @@ export function updateResults(results) {
   // Subtitle
   const subtitle = document.getElementById('rank-subtitle');
   if (subtitle) {
-    subtitle.textContent = `Median from 5,000 simulations`;
+    subtitle.textContent = `Median from 10,000 simulations`;
   }
 
   // 2. Scenario Score
