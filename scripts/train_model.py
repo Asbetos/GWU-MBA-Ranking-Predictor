@@ -62,7 +62,7 @@ LOG_VARS = ['AvgSalaryBonus', 'GMAT_Combined']
 LOGIT_VARS = ['EmployedAtGrad', 'Employed3Mo', 'AcceptanceRate']
 INV_NORM_VARS = []  # None for 8-feature model
 
-N_BOOTSTRAP_ITERATIONS = 1000
+N_BOOTSTRAP_ITERATIONS = 10000
 N_JOBS = 4  # Use 4 cores (avoid issues with -1 on Windows)
 
 # Fixed slider ranges (not data-dependent)

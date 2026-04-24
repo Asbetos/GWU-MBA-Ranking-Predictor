@@ -59,35 +59,7 @@ export function updateResults(results) {
     ciEl.textContent = `${range90[0]}–${range90[1]}`;
   }
 
-  // 4. CI Label
-  const ciLabel = document.getElementById('ci-label');
-  if (ciLabel) {
-    ciLabel.textContent = `90% CI: #${range90[0]} to #${range90[1]}`;
-  }
-
-  // 5. Confidence bar
-  const totalSchools = 122;
-  const bestPct = ((range90[0] - 1) / totalSchools) * 100;
-  const worstPct = ((range90[1]) / totalSchools) * 100;
-  const widthPct = worstPct - bestPct;
-
-  const ciFill = document.getElementById('ci-fill');
-  if (ciFill) {
-    ciFill.style.left = `${bestPct}%`;
-    ciFill.style.width = `${widthPct}%`;
-  }
-
-  const ciBest = document.getElementById('ci-best');
-  if (ciBest) {
-    ciBest.textContent = `Best: #${range90[0]}`;
-  }
-
-  const ciWorst = document.getElementById('ci-worst');
-  if (ciWorst) {
-    ciWorst.textContent = `Worst: #${range90[1]}`;
-  }
-
-  // 6. Chart
+  // 4. Chart
   updateChart(rankDistribution, medianRank, range90);
 }
 

@@ -38,7 +38,10 @@ function createSlider(featureKey, config, initialValue) {
   container.innerHTML = `
     <div class="flex items-center justify-between mb-3">
       <label class="text-sm font-medium text-gray-300" for="range-${featureKey}">${label}</label>
-      <span class="text-sm font-mono font-semibold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg" id="value-${featureKey}">${displayVal}</span>
+      <div>
+        <span class="text-sm font-mono font-semibold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg cursor-pointer hover:bg-indigo-500/20 transition-colors" id="value-${featureKey}" title="Click to edit">${displayVal}</span>
+        <input type="number" id="input-${featureKey}" class="hidden w-24 bg-navy-800 border border-indigo-500/50 text-indigo-400 rounded px-2 py-0.5 text-sm font-mono text-right focus:outline-none focus:border-indigo-500" min="${min}" max="${max}" step="${step}" value="${initialValue}" />
+      </div>
     </div>
     <input
       type="range"
@@ -80,17 +83,19 @@ export function initSliders(containerId, onChange) {
     const slider = createSlider(key, config, currentValues[key]);
     container.appendChild(slider);
 
-    // Attach event listener
-    const input = slider.querySelector(`#range-${key}`);
-    input.addEventListener('input', (e) => {
-      const val = parseFloat(e.target.value);
-      currentValues[key] = val;
+    // Attach event listeners
+    const rangeInput = slider.querySelector(`#range-${key}`);
+    const numInput = slider.querySelector(`#input-${key}`);
+    const display = slider.querySelector(`#value-${key}`);
 
-      // Update display value
-      const display = document.getElementById(`value-${key}`);
-      if (display) {
-        display.textContent = formatValue(val, config.format);
-      }
+    const updateFromValue = (val) => {
+      // Validate
+      val = Math.max(config.min, Math.min(config.max, val));
+      
+      currentValues[key] = val;
+      rangeInput.value = val;
+      numInput.value = val;
+      display.textContent = formatValue(val, config.format);
 
       // Debounced callback
       clearTimeout(debounceTimer);
@@ -99,6 +104,35 @@ export function initSliders(containerId, onChange) {
           onChangeCallback({ ...currentValues });
         }
       }, 300);
+    };
+
+    rangeInput.addEventListener('input', (e) => {
+      updateFromValue(parseFloat(e.target.value));
+    });
+
+    display.addEventListener('click', () => {
+      display.classList.add('hidden');
+      numInput.classList.remove('hidden');
+      numInput.focus();
+    });
+
+    const commitInput = () => {
+      const val = parseFloat(numInput.value);
+      if (!isNaN(val)) {
+        updateFromValue(val);
+      } else {
+        // revert
+        numInput.value = currentValues[key];
+      }
+      numInput.classList.add('hidden');
+      display.classList.remove('hidden');
+    };
+
+    numInput.addEventListener('blur', commitInput);
+    numInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        numInput.blur();
+      }
     });
   }
 
@@ -117,9 +151,14 @@ export function resetSliders() {
     const value = gwuValues[key] ?? config.data_median ?? config.min;
     currentValues[key] = value;
 
-    const input = document.getElementById(`range-${key}`);
-    if (input) {
-      input.value = value;
+    const rangeInput = document.getElementById(`range-${key}`);
+    if (rangeInput) {
+      rangeInput.value = value;
+    }
+
+    const numInput = document.getElementById(`input-${key}`);
+    if (numInput) {
+      numInput.value = value;
     }
 
     const display = document.getElementById(`value-${key}`);

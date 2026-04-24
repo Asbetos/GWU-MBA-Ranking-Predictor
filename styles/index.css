@@ -42,21 +42,22 @@
   }
 
   input[type="range"]::-webkit-slider-thumb {
-    @apply appearance-none w-5 h-5 rounded-full bg-white shadow-lg shadow-indigo-500/50 border-2 border-indigo-500 cursor-pointer;
+    @apply appearance-none w-8 h-4 rounded bg-white shadow-lg shadow-indigo-500/50 border border-indigo-500 cursor-pointer;
+    margin-top: -4px;
     transition: all 0.15s ease;
   }
 
   input[type="range"]::-webkit-slider-thumb:hover {
-    @apply w-6 h-6 shadow-xl shadow-indigo-500/60;
+    @apply shadow-xl shadow-indigo-500/60;
   }
 
   input[type="range"]::-moz-range-thumb {
-    @apply w-5 h-5 rounded-full bg-white shadow-lg shadow-indigo-500/50 border-2 border-indigo-500 cursor-pointer;
+    @apply w-8 h-4 rounded bg-white shadow-lg shadow-indigo-500/50 border border-indigo-500 cursor-pointer;
     transition: all 0.15s ease;
   }
 
   input[type="range"]::-moz-range-thumb:hover {
-    @apply w-6 h-6 shadow-xl shadow-indigo-500/60;
+    @apply shadow-xl shadow-indigo-500/60;
   }
 
   input[type="range"]::-webkit-slider-runnable-track {
@@ -82,16 +83,6 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-  }
-
-  .confidence-bar {
-    @apply relative h-3 rounded-full overflow-hidden;
-    background: rgba(255,255,255,0.1);
-  }
-
-  .confidence-fill {
-    @apply absolute top-0 left-0 h-full rounded-full transition-all duration-500;
-    background: linear-gradient(to right, #6366F1, #06B6D4);
   }
 
   .shimmer {
