@@ -1,21 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GWU MBA Ranking Predictor | What-If Scenario Planning</title>
-  <meta name="description" content="Interactive what-if scenario planning tool for predicting GWU's US News MBA ranking. Adjust 8 key variables and see real-time ranking predictions." />
+  <meta name="description"
+    content="Interactive what-if scenario planning tool for predicting GWU's US News MBA ranking. Adjust 8 key variables and see real-time ranking predictions." />
   <meta property="og:title" content="GWU MBA Ranking Predictor" />
-  <meta property="og:description" content="Predict how changes in key metrics affect GWU's US News MBA ranking using Monte Carlo simulation." />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>" />
+  <meta property="og:description"
+    content="Predict how changes in key metrics affect GWU's US News MBA ranking using Monte Carlo simulation." />
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>" />
   <link rel="stylesheet" href="/styles/index.css" />
 </head>
+
 <body class="min-h-screen">
   <!-- Ambient background -->
   <div class="fixed inset-0 -z-10">
     <div class="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
     <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-3xl animate-pulse-slow"></div>
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-3xl animate-pulse-slow">
+    </div>
   </div>
 
   <!-- Header -->
@@ -24,7 +31,8 @@
       <h1 class="text-2xl font-black tracking-tight text-white m-0">MBA Ranking Predictor</h1>
       <div class="hidden md:block h-6 w-px bg-white/20"></div>
       <p class="text-gray-400 text-sm m-0">
-        Adjust 8 key variables to simulate changes to <span class="text-indigo-400 font-semibold" id="school-name">GWU's</span> US News ranking.
+        Adjust 8 key variables to simulate changes to <span class="text-indigo-400 font-semibold"
+          id="school-name">GWU's</span> US News ranking
       </p>
     </div>
   </header>
@@ -101,10 +109,13 @@
   <!-- Footer -->
   <footer class="max-w-7xl mx-auto px-6 py-2 mt-2 border-t border-white/5">
     <p class="text-center text-gray-600 text-sm">
-      Built for GWSB Operations & Strategic Initiatives Department - by <a href="https://www.linkedin.com/in/venkateshbn/" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300">asbetos</a>
+      Built for GWSB Operations & Strategic Initiatives Department - by <a
+        href="https://www.linkedin.com/in/venkateshbn/" target="_blank" rel="noopener noreferrer"
+        class="text-indigo-400 hover:text-indigo-300">asbetos</a>
     </p>
   </footer>
 
   <script type="module" src="/src/main.js"></script>
 </body>
+
 </html>
