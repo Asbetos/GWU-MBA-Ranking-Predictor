@@ -169,13 +169,31 @@ export function simulateRank(customMetrics, targetSchool = null, nSimulations = 
     return { ...school };
   });
 
-  // 3. Predict scores for all schools
-  const baseScores = simData.map(school => {
-    const features = {};
+  // 3. Predict scores for all schools using residual anchoring
+  const baseScores = simData.map((school, i) => {
+    const trueScore = dataSnapshot[i].OverallScore;
+    
+    // Baseline prediction using original features
+    const baselineFeatures = {};
     for (const feat of modelConfig.features) {
-      features[feat] = school[feat];
+      baselineFeatures[feat] = dataSnapshot[i][feat];
     }
-    return predictScore(features);
+    const baselinePredicted = predictScore(baselineFeatures);
+    
+    // Calculate residual (True - Predicted)
+    const residual = (trueScore !== undefined && trueScore !== null && !isNaN(trueScore)) 
+      ? (trueScore - baselinePredicted) 
+      : 0;
+
+    // Simulation prediction using modified features
+    const simFeatures = {};
+    for (const feat of modelConfig.features) {
+      simFeatures[feat] = school[feat];
+    }
+    const simPredicted = predictScore(simFeatures);
+
+    // Anchored score = New Prediction + Historical Residual
+    return simPredicted + residual;
   });
 
   // 4. Setup volatility (tiered noise)
