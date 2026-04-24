@@ -7,6 +7,11 @@
 @layer base {
   body {
     @apply bg-navy-900 text-gray-100 font-sans antialiased;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  body::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -113,19 +118,4 @@
   max-height: 250px;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-}
 
-::-webkit-scrollbar-track {
-  @apply bg-navy-900;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-navy-600 rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-navy-700;
-}

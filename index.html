@@ -19,41 +19,25 @@
   </div>
 
   <!-- Header -->
-  <header class="pt-6 pb-2 px-6">
-    <div class="max-w-7xl mx-auto text-center">
-      <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-2 text-white">
-        MBA Ranking Predictor
-      </h1>
-      <p class="text-gray-400 text-base max-w-2xl mx-auto">
-        Adjust the 8 key variables below to simulate how changes affect
-        <span class="text-indigo-400 font-semibold" id="school-name">GWU's</span> predicted US News MBA ranking
+  <header class="pt-4 pb-2 px-6">
+    <div class="max-w-7xl mx-auto text-center flex flex-col md:flex-row items-center justify-center gap-4">
+      <h1 class="text-2xl font-black tracking-tight text-white m-0">MBA Ranking Predictor</h1>
+      <div class="hidden md:block h-6 w-px bg-white/20"></div>
+      <p class="text-gray-400 text-sm m-0">
+        Adjust 8 key variables to simulate changes to <span class="text-indigo-400 font-semibold" id="school-name">GWU's</span> US News ranking.
       </p>
     </div>
   </header>
 
   <!-- Main content -->
-  <main class="max-w-7xl mx-auto px-6 py-4">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+  <main class="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-6">
 
-      <!-- Left: Sliders Panel -->
-      <div class="lg:col-span-7 space-y-4">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-xl font-bold text-white">Input Variables</h2>
-          <button id="reset-btn" class="reset-btn">
-            ↺ Reset to Current
-          </button>
-        </div>
-
-        <div id="sliders-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Sliders injected by JS -->
-        </div>
-      </div>
-
-      <!-- Right: Results Panel -->
-      <div class="lg:col-span-5 space-y-4 lg:sticky lg:top-4 lg:self-start">
-
+    <!-- Top Row: Results Panel -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left: Rank & Info -->
+      <div class="flex flex-col gap-4">
         <!-- Current GWU Info -->
-        <div class="glass-panel p-4" id="current-info">
+        <div class="glass-panel p-4 flex flex-col justify-center" id="current-info">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
             <p class="text-gray-400 text-sm">Current Standing</p>
@@ -70,12 +54,15 @@
         </div>
 
         <!-- Predicted Rank Card -->
-        <div class="glass-panel p-8 text-center" id="rank-card">
+        <div class="glass-panel p-6 text-center flex-1 flex flex-col justify-center" id="rank-card">
           <p class="text-gray-400 text-sm uppercase tracking-widest mb-2">Predicted Rank</p>
           <div id="rank-display" class="rank-display mb-2">#—</div>
           <p class="text-gray-500 text-sm" id="rank-subtitle">Move sliders to predict</p>
         </div>
+      </div>
 
+      <!-- Middle/Right: Stats & Chart -->
+      <div class="lg:col-span-2 flex flex-col gap-4">
         <!-- Stats Grid -->
         <div class="grid grid-cols-2 gap-4">
           <div class="stat-card" id="score-card">
@@ -89,14 +76,26 @@
         </div>
 
         <!-- Rank Distribution Chart -->
-        <div class="glass-panel p-4">
+        <div class="glass-panel p-4 flex-1">
           <p class="text-gray-400 text-sm mb-2">Rank Distribution</p>
           <canvas id="rankChart"></canvas>
         </div>
-
-
       </div>
     </div>
+
+    <!-- Bottom Row: Sliders Panel -->
+    <div class="space-y-4">
+      <h2 class="text-xl font-bold text-white">Input Variables</h2>
+      <div id="sliders-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Sliders injected by JS -->
+      </div>
+      <div class="flex justify-end pt-2">
+        <button id="reset-btn" class="reset-btn">
+          ↺ Reset to Current
+        </button>
+      </div>
+    </div>
+
   </main>
 
   <!-- Footer -->

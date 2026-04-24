@@ -36,13 +36,14 @@ function createSlider(featureKey, config, initialValue) {
   const displayVal = formatValue(initialValue, format);
 
   container.innerHTML = `
-    <div class="flex items-center justify-between mb-3">
+    <div class="flex items-center justify-between mb-2">
       <label class="text-sm font-medium text-gray-300" for="range-${featureKey}">${label}</label>
-      <div>
+      <div class="flex flex-col items-end">
         <span class="text-sm font-mono font-semibold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg cursor-pointer hover:bg-indigo-500/20 transition-colors" id="value-${featureKey}" title="Click to edit">${displayVal}</span>
-        <input type="number" id="input-${featureKey}" class="hidden w-24 bg-navy-800 border border-indigo-500/50 text-indigo-400 rounded px-2 py-0.5 text-sm font-mono text-right focus:outline-none focus:border-indigo-500" min="${min}" max="${max}" step="${step}" value="${initialValue}" />
+        <input type="number" id="input-${featureKey}" class="hidden w-24 bg-navy-800 border border-indigo-500/50 text-indigo-400 rounded px-2 py-0.5 text-sm font-mono text-right focus:outline-none focus:border-indigo-500 transition-colors" min="${min}" max="${max}" step="${step}" value="${initialValue}" />
       </div>
     </div>
+    <div id="error-${featureKey}" class="hidden text-red-400 text-[10px] text-right mb-1 -mt-1">Invalid range (${min}-${max})</div>
     <input
       type="range"
       id="range-${featureKey}"
@@ -87,15 +88,34 @@ export function initSliders(containerId, onChange) {
     const rangeInput = slider.querySelector(`#range-${key}`);
     const numInput = slider.querySelector(`#input-${key}`);
     const display = slider.querySelector(`#value-${key}`);
+    const errorMsg = slider.querySelector(`#error-${key}`);
+
+    const validateInput = (val) => {
+      return !isNaN(val) && val >= config.min && val <= config.max;
+    };
+
+    const toggleError = (isInvalid) => {
+      if (isInvalid) {
+        errorMsg.classList.remove('hidden');
+        numInput.classList.remove('border-indigo-500/50', 'text-indigo-400', 'focus:border-indigo-500');
+        numInput.classList.add('border-red-500', 'text-red-400', 'focus:border-red-500');
+      } else {
+        errorMsg.classList.add('hidden');
+        numInput.classList.add('border-indigo-500/50', 'text-indigo-400', 'focus:border-indigo-500');
+        numInput.classList.remove('border-red-500', 'text-red-400', 'focus:border-red-500');
+      }
+    };
 
     const updateFromValue = (val) => {
-      // Validate
+      // Validate clamp
       val = Math.max(config.min, Math.min(config.max, val));
       
       currentValues[key] = val;
       rangeInput.value = val;
       numInput.value = val;
       display.textContent = formatValue(val, config.format);
+
+      toggleError(false);
 
       // Debounced callback
       clearTimeout(debounceTimer);
@@ -110,6 +130,11 @@ export function initSliders(containerId, onChange) {
       updateFromValue(parseFloat(e.target.value));
     });
 
+    numInput.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      toggleError(!validateInput(val));
+    });
+
     display.addEventListener('click', () => {
       display.classList.add('hidden');
       numInput.classList.remove('hidden');
@@ -118,11 +143,12 @@ export function initSliders(containerId, onChange) {
 
     const commitInput = () => {
       const val = parseFloat(numInput.value);
-      if (!isNaN(val)) {
+      if (validateInput(val)) {
         updateFromValue(val);
       } else {
         // revert
         numInput.value = currentValues[key];
+        toggleError(false);
       }
       numInput.classList.add('hidden');
       display.classList.remove('hidden');
