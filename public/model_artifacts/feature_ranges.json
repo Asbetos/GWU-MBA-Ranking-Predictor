@@ -13,7 +13,7 @@
   "Employed3Mo": {
     "data_min": 0.446,
     "data_max": 0.982,
-    "data_mean": 0.8114180327868853,
+    "data_mean": 0.8114180327868852,
     "data_median": 0.8325,
     "min": 0.2,
     "max": 1.0,
@@ -35,7 +35,7 @@
   "MedianGPA": {
     "data_min": 3.1,
     "data_max": 3.8,
-    "data_mean": 3.5189839034302706,
+    "data_mean": 3.518982073048901,
     "data_median": 3.5,
     "min": 3.0,
     "max": 4.0,
@@ -57,7 +57,7 @@
   "PeerScore": {
     "data_min": 1.8,
     "data_max": 4.8,
-    "data_mean": 3.2139344262295073,
+    "data_mean": 3.213934426229508,
     "data_median": 3.1,
     "min": 1.0,
     "max": 5.0,
@@ -68,8 +68,8 @@
   "RecruiterScore": {
     "data_min": 1.8,
     "data_max": 4.6,
-    "data_mean": 3.300754551016187,
-    "data_median": 3.2966358649275636,
+    "data_mean": 3.300778749724429,
+    "data_median": 3.298095483328157,
     "min": 1.0,
     "max": 5.0,
     "step": 0.1,
@@ -77,15 +77,34 @@
     "format": "number"
   },
   "GMAT_Combined": {
-    "data_min": 465.0,
-    "data_max": 750.0,
-    "data_mean": 596.9363124034705,
-    "data_median": 585.0,
-    "min": 205,
-    "max": 805,
-    "step": 5,
-    "label": "GMAT Score (Combined)",
+    "data_min": 0.13114754098360656,
+    "data_max": 97.51663690959259,
+    "data_mean": 50.69974345942269,
+    "data_median": 51.45533623285381,
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "label": "GMAT/GRE Blended Percentile Score",
     "format": "number"
+  },
+  "_gmat_input_config": {
+    "gmat_scale_default": "old",
+    "gmat_old_range": {
+      "min": 500,
+      "max": 800,
+      "step": 5
+    },
+    "gmat_new_range": {
+      "min": 505,
+      "max": 805,
+      "step": 5
+    },
+    "gre_range": {
+      "min": 280,
+      "max": 340,
+      "step": 1
+    },
+    "gre_default_enabled": false
   },
   "_gwu_current": {
     "EmployedAtGrad": 0.477,
@@ -95,7 +114,13 @@
     "AcceptanceRate": 0.251,
     "PeerScore": 3.2,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 594.2571230246386
+    "GMAT_Combined": 22.721311475409838,
+    "gmat_old": 712.6896621473993,
+    "gmat_new": 594.2556815578506,
+    "gre_total": 300.0,
+    "pct_gmat_old": 0.06,
+    "pct_gmat_new": 0.03,
+    "pct_gre": 0.06
   },
   "_gwu_school_name": "George Washington University",
   "_gwu_current_rank": 69,

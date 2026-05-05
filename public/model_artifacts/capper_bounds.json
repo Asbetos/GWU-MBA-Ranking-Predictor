@@ -1,34 +1,30 @@
 {
   "EmployedAtGrad": {
-    "lower": 0.33355,
-    "upper": 0.7869
+    "lower": 0.348,
+    "upper": 0.8349999999999997
   },
   "Employed3Mo": {
-    "lower": 0.61795,
-    "upper": 0.9565999999999999
+    "lower": 0.6431,
+    "upper": 0.9579
   },
   "AvgSalaryBonus": {
-    "lower": 65209.35,
-    "upper": 197390.85
+    "lower": 63935.5,
+    "upper": 197840.4
   },
   "MedianGPA": {
     "lower": 3.3,
     "upper": 3.8
   },
   "AcceptanceRate": {
-    "lower": 0.13435000000000002,
-    "upper": 0.9079999999999998
+    "lower": 0.1472,
+    "upper": 0.909
   },
   "PeerScore": {
-    "lower": 2.105,
-    "upper": 4.494999999999999
+    "lower": 2.2,
+    "upper": 4.5
   },
   "RecruiterScore": {
-    "lower": 2.5,
-    "upper": 4.294999999999999
-  },
-  "GMAT_Combined": {
-    "lower": 511.2669727890763,
-    "upper": 730.0
+    "lower": 2.31,
+    "upper": 4.4
   }
 }

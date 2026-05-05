@@ -1,7 +1,6 @@
 {
   "log_cols": [
-    "AvgSalaryBonus",
-    "GMAT_Combined"
+    "AvgSalaryBonus"
   ],
   "logit_cols": [
     "EmployedAtGrad",

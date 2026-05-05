@@ -11,13 +11,21 @@
   ],
   "target": "OverallScore",
   "log_vars": [
-    "AvgSalaryBonus",
-    "GMAT_Combined"
+    "AvgSalaryBonus"
   ],
   "logit_vars": [
     "EmployedAtGrad",
     "Employed3Mo",
     "AcceptanceRate"
   ],
-  "inv_norm_vars": []
+  "inv_norm_vars": [],
+  "outlier_cap_features": [
+    "EmployedAtGrad",
+    "Employed3Mo",
+    "AvgSalaryBonus",
+    "MedianGPA",
+    "AcceptanceRate",
+    "PeerScore",
+    "RecruiterScore"
+  ]
 }
