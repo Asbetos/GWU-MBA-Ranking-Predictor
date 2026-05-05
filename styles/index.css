@@ -309,4 +309,41 @@
 .core-delta--down { color: #fda4af; }
 .core-delta--null { color: #475569; }
 
+/* ================================================================ */
+/* Tab 4 — Score Model Insights                                     */
+/* ================================================================ */
+.contrib-toggle {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.contrib-toggle:hover {
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.contrib-toggle.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(6, 182, 212, 0.3));
+  border-color: rgba(99, 102, 241, 0.45);
+}
+
+.gmat-scale-btn {
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gmat-scale-btn:hover {
+  background: rgba(99, 102, 241, 0.18);
+  color: #e0e7ff;
+}
 

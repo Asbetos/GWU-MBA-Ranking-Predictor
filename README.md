@@ -15,6 +15,15 @@ An interactive what-if scenario planning tool for predicting George Washington U
 
 ---
 
+## Webapp Tabs
+
+| # | Tab | What it shows |
+|---|---|---|
+| 1 | **Direct Predictor** | 8 sliders for the core US News features (employment, salary, GPA, acceptance, peer/recruiter scores, GMAT/GRE blend). The GMAT control toggles between Old (200–800) and New (205–805) GMAT scales and lets you optionally include a GRE total score. |
+| 2 | **Lever Models** | Reliability of each of the 8 indirect "core feature" models (independent ML pipelines that predict each US News feature from non-methodological levers). |
+| 3 | **Lever Predictor** | What-if planning at the lever level — adjust non-method inputs (tuition, demographics, work experience, etc.) and see the predicted core features and final rank. |
+| 4 | **Score Model Insights** | Performance metrics (MAE, RMSE, R², Spearman ρ), the bootstrapped coefficient table with 95% CIs and significance, and per-feature percentage contribution to the predicted score (averaged across all schools or for GWU specifically). |
+
 ## Quick Start
 
 ### Prerequisites
@@ -56,7 +65,7 @@ npm run preview
 
 ### Overview
 
-The model predicts US News MBA ranking scores using 8 input features, trained on the 2025 US News dataset (122 schools). A Monte Carlo simulation then converts the predicted score into a rank distribution by simulating market volatility across all competing schools.
+The model predicts US News MBA ranking scores using 8 input features, trained on the **2024 + 2025** US News datasets (~243 school-year observations). A Monte Carlo simulation then converts the predicted score into a rank distribution by simulating market volatility across all competing schools.
 
 ### Data Preprocessing Pipeline
 
@@ -86,13 +95,21 @@ Raw column names from the CSV are mapped to clean model names:
 - `school_info.us_news_rank_out_of` — constant value, not predictive
 - `ranking_scores_two_year_averages.salaries_by_profession_indicator_rank` — excluded from the 8-feature model
 
-**3. GMAT Score Combination**
+**3. GMAT/GRE Blended Percentile (US-News-style)**
 
-The dataset contains two GMAT columns (old 200-800 scale and new 205-805 Focus Edition scale). They are combined with priority to the old score:
+The naive `fillna()` approach has been replaced with the actual US News methodology:
 
-```python
-df['GMAT_Combined'] = df['GMAT_Old'].fillna(df['GMAT_New'])
-```
+1. **Per-year percentile ranks** for each test (`GMAT_Old`, `GMAT_New`, `GRE_Total`) computed within each year's cohort.
+2. **Submission-weighted blend** — for each school, the blended percentile is:
+   ```
+   blended = (pct_old·rank_old + pct_new·rank_new + pct_gre·rank_gre) / (pct_old + pct_new + pct_gre)
+   ```
+3. **Threshold penalty** — if a school's total submission percentage across the three tests is below 25%, the blended score is multiplied by `min(1, total_submission/0.25)` to discount low-coverage schools.
+4. **z-score standardization** — the resulting 0-100 blended score replaces `GMAT_Combined` and is centered/scaled by the pipeline's `StandardScaler`.
+
+For schools with no submission data at all, the per-year median blended score is used as fallback.
+
+The GRE total per school is derived from `gre_data.gre_score_range_10th_90th` by parsing the verbal and quantitative ranges and summing their midpoints (out of ~340).
 
 **4. KNN Imputation**
 
@@ -147,30 +164,35 @@ intercept = 100 - dot(transform(Stanford_features), coefficients)
 
 ### Trained Model Coefficients
 
+After re-training on 2024 + 2025 with the GMAT/GRE blended percentile transformation:
+
 | Feature | Mean Weight | 95% CI | Significant? |
 |---|---|---|---|
-| `AvgSalaryBonus` | 9.42 | [6.91, 11.73] | ✓ |
-| `PeerScore` | 5.22 | [3.58, 6.94] | ✓ |
-| `RecruiterScore` | 3.58 | [2.63, 4.35] | ✓ |
-| `MedianGPA` | 2.92 | [2.07, 3.86] | ✓ |
-| `Employed3Mo` | 2.36 | [1.12, 3.65] | ✓ |
-| `EmployedAtGrad` | 1.78 | [0.61, 2.96] | ✓ |
-| `GMAT_Combined` | 0.79 | [-0.52, 2.51] | ✗ |
-| `AcceptanceRate` | -1.38 | [-2.45, -0.23] | ✓ |
+| `AvgSalaryBonus` | 9.67 | [8.22, 11.18] | ✓ |
+| `PeerScore` | 6.55 | [5.32, 7.80] | ✓ |
+| `MedianGPA` | 3.29 | [2.72, 3.88] | ✓ |
+| `RecruiterScore` | 3.00 | [2.14, 3.75] | ✓ |
+| `Employed3Mo` | 2.62 | [1.74, 3.57] | ✓ |
+| `EmployedAtGrad` | 1.34 | [0.38, 2.23] | ✓ |
+| `GMAT_Combined` | 1.30 | [0.45, 2.13] | ✓ |
+| `AcceptanceRate` | -0.97 | [-1.72, -0.16] | ✓ |
 
 **Key insights:**
-- Average Salary + Bonus is by far the strongest predictor (weight 9.42)
-- GMAT score is the only non-significant feature (CI crosses zero)
-- Acceptance Rate has a negative weight: lower acceptance → higher score (more selective = better)
+- Doubling the training set (and using a more faithful GMAT methodology) tightens every confidence interval; **all 8 features are now significant**, including `GMAT_Combined` which previously crossed zero.
+- Average Salary + Bonus remains the strongest predictor.
+- Acceptance Rate stays negatively signed: lower acceptance → higher score (more selective = better).
+
+The exact coefficients are regenerated each time `train_model.py` runs and exported as `model_explainability.json` (consumed by the Score Model Insights tab in the webapp).
 
 ### Model Performance
 
 | Metric | Value |
 |---|---|
-| MAE | 4.69 |
-| RMSE | 5.55 |
-| R² | 0.924 |
-| Spearman ρ | 0.982 |
+| MAE | 4.18 |
+| RMSE | 5.11 |
+| R² | 0.941 |
+| Spearman ρ | 0.978 |
+| Observations | 243 |
 
 ### Monte Carlo Rank Simulation
 
@@ -249,14 +271,16 @@ webapp/
 │   └── results.js                 # Results panel + Chart.js visualization
 │
 ├── public/
-│   └── model_artifacts/           # Pre-trained model parameters (7 JSON files)
+│   └── model_artifacts/           # Pre-trained model parameters (9 JSON files)
 │       ├── model_config.json      #   Feature list, transform config
 │       ├── capper_bounds.json     #   OutlierCapper percentile bounds
 │       ├── transformer_config.json#   Log/logit/inv_norm column mappings
 │       ├── scaler_params.json     #   StandardScaler mean and scale vectors
 │       ├── model_weights.json     #   Regression coefficients + intercept
-│       ├── data_snapshot.json     #   All 122 schools with imputed features
-│       └── feature_ranges.json   #   Slider ranges + GWU current values
+│       ├── data_snapshot.json     #   All schools (most recent year) with imputed features
+│       ├── feature_ranges.json    #   Slider ranges + GWU current values + GMAT input config
+│       ├── gmat_inference_curves.json  #   Sorted GMAT/GRE scores for client-side percentile ranks
+│       └── model_explainability.json   #   Performance metrics + coefficients + contribution %s
 │
 └── scripts/
     ├── train_model.py             # Full training pipeline (Python)
@@ -270,8 +294,9 @@ webapp/
 When new ranking data is available:
 
 ```bash
-# 1. Place the new CSV at the expected path
-#    → ../data/us_news_data_2025.csv (relative to webapp/)
+# 1. Place the new CSVs at the expected paths
+#    → ../all_schools_flat_2024.csv (relative to webapp/)
+#    → ../all_schools_flat_2025.csv
 
 # 2. Install Python dependencies (one-time)
 cd scripts
@@ -279,7 +304,7 @@ pip install -r requirements.txt
 
 # 3. Run the training script
 python train_model.py
-#    → Outputs 7 JSON files to public/model_artifacts/
+#    → Outputs 9 JSON files to public/model_artifacts/
 
 # 4. The webapp will automatically use the new artifacts on next load
 ```
