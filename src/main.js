@@ -1,38 +1,44 @@
 /**
  * GWU MBA Ranking Predictor — Main Application
- * Bootstraps the model, initializes sliders, and wires up the prediction loop.
+ * Bootstraps all three tabs and wires them up.
  */
 
 import { loadModel, simulateRank, getGWUSchoolName, getGWUCurrentRank, getGWUCurrentScore } from './model.js';
 import { initSliders, resetSliders } from './sliders.js';
 import { updateResults, showCurrentInfo } from './results.js';
+import { loadCfmArtifacts } from './cfm-models.js';
+import { renderExplainability } from './explainability.js';
+import { initLeverPredictor } from './lever-predictor.js';
+import { initTabs } from './tabs.js';
+import { initScoreModelTab } from './score-model.js';
 
 async function init() {
   try {
-    // 1. Load model artifacts
     console.log('[init] Loading model artifacts...');
-    await loadModel();
-    console.log('[init] Model loaded successfully.');
+    await Promise.all([loadModel(), loadCfmArtifacts()]);
+    console.log('[init] Model + CFM artifacts loaded.');
 
-    // 2. Show current GWU info
+    // Tab nav first so panes show/hide correctly.
+    // Register lazy-init handlers BEFORE initTabs so the initial activation
+    // event fires through them.
+    initScoreModelTab();
+    initTabs();
+
+    // ----- Tab 1 (Direct Predictor) -----
     const schoolName = getGWUSchoolName();
-    const currentRank = getGWUCurrentRank();
-    const currentScore = getGWUCurrentScore();
-    showCurrentInfo(schoolName, currentRank, currentScore);
+    showCurrentInfo(schoolName, getGWUCurrentRank(), getGWUCurrentScore());
 
-    // 3. Initialize sliders with change callback
     const initialValues = initSliders('sliders-container', handleSliderChange);
+    if (initialValues) handleSliderChange(initialValues);
 
-    // 4. Run initial simulation
-    if (initialValues) {
-      handleSliderChange(initialValues);
-    }
-
-    // 5. Wire reset button
     const resetBtn = document.getElementById('reset-btn');
-    if (resetBtn) {
-      resetBtn.addEventListener('click', resetSliders);
-    }
+    if (resetBtn) resetBtn.addEventListener('click', resetSliders);
+
+    // ----- Tab 2 (Performance) -----
+    renderExplainability();
+
+    // ----- Tab 3 (Lever Predictor) -----
+    initLeverPredictor();
 
     console.log('[init] App ready.');
   } catch (err) {
@@ -63,5 +69,4 @@ function showError(message) {
   }
 }
 
-// Boot the app
 init();

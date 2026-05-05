@@ -11,11 +11,13 @@ let scalerParams = null;
 let modelWeights = null;
 let dataSnapshot = null;
 let featureRanges = null;
+let gmatCurves = null;
+let modelExplainability = null;
 
 /** Load all model artifacts from static JSON files */
 export async function loadModel() {
   const base = '/model_artifacts';
-  const [config, capper, transformer, scaler, weights, snapshot, ranges] = await Promise.all([
+  const [config, capper, transformer, scaler, weights, snapshot, ranges, curves, expl] = await Promise.all([
     fetch(`${base}/model_config.json`).then(r => r.json()),
     fetch(`${base}/capper_bounds.json`).then(r => r.json()),
     fetch(`${base}/transformer_config.json`).then(r => r.json()),
@@ -23,6 +25,8 @@ export async function loadModel() {
     fetch(`${base}/model_weights.json`).then(r => r.json()),
     fetch(`${base}/data_snapshot.json`).then(r => r.json()),
     fetch(`${base}/feature_ranges.json`).then(r => r.json()),
+    fetch(`${base}/gmat_inference_curves.json`).then(r => r.json()).catch(() => null),
+    fetch(`${base}/model_explainability.json`).then(r => r.json()).catch(() => null),
   ]);
 
   modelConfig = config;
@@ -32,6 +36,8 @@ export async function loadModel() {
   modelWeights = weights;
   dataSnapshot = snapshot;
   featureRanges = ranges;
+  gmatCurves = curves;
+  modelExplainability = expl;
 
   return { modelConfig, featureRanges, dataSnapshot };
 }
@@ -59,6 +65,85 @@ export function getGWUCurrentRank() {
 /** Get GWU current score */
 export function getGWUCurrentScore() {
   return featureRanges?._gwu_current_score || null;
+}
+
+/** Get GMAT input config (slider ranges, defaults) */
+export function getGmatInputConfig() {
+  return featureRanges?._gmat_input_config || {};
+}
+
+/** Get model explainability artifact */
+export function getModelExplainability() {
+  return modelExplainability;
+}
+
+/** Get GMAT/GRE percentile-rank curves (sorted score arrays from snapshot year) */
+export function getGmatCurves() {
+  return gmatCurves;
+}
+
+// ============================================================
+// GMAT/GRE BLENDED-SCORE COMPUTATION
+// (mirrors compute_blended_gmat_feature in train_model.py)
+// ============================================================
+
+const GMAT_BLEND_THRESHOLD = 0.25;
+
+function percentileRank(score, sortedArr) {
+  if (!sortedArr || sortedArr.length === 0 || score === null || score === undefined || Number.isNaN(score)) {
+    return 0;
+  }
+  // Binary search lower bound
+  let lo = 0, hi = sortedArr.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    if (sortedArr[mid] < score) lo = mid + 1;
+    else hi = mid;
+  }
+  // 'average' rank in [1, N]: count of values <= score / N (matching scipy rankdata/N)
+  // We approximate by midpoint of (count_strictly_less, count_le).
+  let lower = lo;
+  let upper = lo;
+  while (upper < sortedArr.length && sortedArr[upper] === score) upper++;
+  const avgRank = (lower + upper + 1) / 2; // 1-indexed average rank
+  return avgRank / sortedArr.length;
+}
+
+/**
+ * Compute the blended GMAT/GRE percentile score (0-100) from raw user inputs.
+ * @param {Object} input - { scale: 'old'|'new', gmat_score: number|null, gre_total: number|null }
+ * @returns {number} blended score in [0, 100]
+ */
+export function computeBlendedGMAT({ scale, gmat_score, gre_total }) {
+  if (!gmatCurves) {
+    // Fallback: passthrough if curves not available (shouldn't happen in prod)
+    return gmat_score ?? 0;
+  }
+
+  let p_old = 0, p_new = 0, p_gre = 0;
+  let r_old = 0, r_new = 0, r_gre = 0;
+
+  if (scale === 'old' && gmat_score !== null && gmat_score !== undefined && !Number.isNaN(gmat_score)) {
+    p_old = 1;
+    r_old = percentileRank(gmat_score, gmatCurves.gmat_old);
+  } else if (scale === 'new' && gmat_score !== null && gmat_score !== undefined && !Number.isNaN(gmat_score)) {
+    p_new = 1;
+    r_new = percentileRank(gmat_score, gmatCurves.gmat_new);
+  }
+
+  if (gre_total !== null && gre_total !== undefined && !Number.isNaN(gre_total)) {
+    p_gre = 1;
+    r_gre = percentileRank(gre_total, gmatCurves.gre_total);
+  }
+
+  const totalPct = p_old + p_new + p_gre;
+  if (totalPct <= 0) return 0;
+
+  let blended = (p_old * r_old + p_new * r_new + p_gre * r_gre) / totalPct;
+  if (totalPct < GMAT_BLEND_THRESHOLD) {
+    blended *= totalPct / GMAT_BLEND_THRESHOLD;
+  }
+  return Math.max(0, Math.min(100, blended * 100));
 }
 
 // ============================================================
@@ -162,7 +247,13 @@ export function simulateRank(customMetrics, targetSchool = null, nSimulations = 
       // Apply custom metrics to target school
       const modified = { ...school };
       for (const [key, val] of Object.entries(customMetrics)) {
-        modified[key] = val;
+        // Special-case: GMAT_Combined may arrive as either a scalar (already-blended 0-100)
+        // or as a composite object {scale, gmat_score, gre_total} from the slider UI.
+        if (key === 'GMAT_Combined' && val !== null && typeof val === 'object') {
+          modified[key] = computeBlendedGMAT(val);
+        } else {
+          modified[key] = val;
+        }
       }
       return modified;
     }
