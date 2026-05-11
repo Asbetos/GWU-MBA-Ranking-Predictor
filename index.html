@@ -121,14 +121,15 @@
           <h2 class="text-xl font-bold text-white mb-1">How the Indirect Lever Models work</h2>
           <p class="text-gray-300 text-sm leading-relaxed">
             Indirect levers — like tuition, work-experience averages, or applicant demographics — aren't ranked by US News directly.
-            Instead, each of the 9 ranking indicators has its own machine-learning model that translates these levers into a
-            predicted indicator value. The Direct Score Model then turns those into a rank.
+            Instead, <strong class="text-white">eight</strong> of the nine ranking indicators have their own machine-learning model that translates these levers into a
+            predicted indicator value. (The ninth indicator — Salary by Profession — is a deterministic cohort ratio, not a learned model.)
+            The Direct Score Model then turns the predicted indicators into a rank.
           </p>
           <p class="text-gray-400 text-xs mt-2 leading-relaxed">
-            <strong class="text-white">Each card below = one of those 9 indicator-level models.</strong>
+            <strong class="text-white">Each card below = one of the 8 indicator-level models.</strong>
             The confidence badge tells you how trustworthy that model is — based on how well it predicts schools it was <em>not</em>
             trained on (cross-validation) <strong>and</strong> on a forward-in-time test (train on 2024, test on 2025).
-            <strong class="text-white">Hover any card</strong> to see which levers drive that indicator and by how much.
+            Every lever's % contribution to that model's prediction is listed directly beneath each card.
           </p>
           <div id="performance-legend" class="flex flex-wrap gap-3 mt-3 text-xs">
             <span class="confidence-pill confidence-high">High — trust the direction and rough magnitude</span>
@@ -142,11 +143,11 @@
         <div class="glass-panel p-4 border-amber-500/30">
           <p class="text-amber-300 text-xs leading-relaxed">
             <strong>Reading the card metrics:</strong>
-            <strong class="text-white">CV R²</strong> is how much of the indicator's variation the model can explain on unseen schools
+            <strong class="text-white">Cross-val fit</strong> is how much of the indicator's variation the model can explain on schools it wasn't trained on
             (1.00 = perfect, near 0 = no better than the cohort average).
-            <strong class="text-white">Holdout R²</strong> repeats the test forward in time (train 2024, predict 2025).
-            <strong class="text-white">MAE</strong> is the average prediction error in the indicator's own units.
-            <strong class="text-white">Rows</strong> is the training-set size.
+            <strong class="text-white">Next-year fit</strong> repeats the same test forward in time — train on 2024 data, predict 2025.
+            <strong class="text-white">Avg error</strong> is the typical prediction miss in the indicator's own units (percentage points for rates, dollars for salary, etc.).
+            <strong class="text-white">Trained on</strong> is the number of school-year observations the model learned from.
           </p>
         </div>
       </div>
