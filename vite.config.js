@@ -8,10 +8,10 @@ export default defineConfig({
   root: './',
   publicDir: 'public',
   server: {
-    port: 3000,
+    port: 3100,
   },
   preview: {
-    port: 4000,
+    port: 4100,
   },
   build: {
     outDir: 'dist',

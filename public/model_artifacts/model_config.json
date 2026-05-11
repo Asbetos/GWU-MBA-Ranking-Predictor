@@ -3,6 +3,7 @@
     "EmployedAtGrad",
     "Employed3Mo",
     "AvgSalaryBonus",
+    "SalaryByProfession",
     "MedianGPA",
     "AcceptanceRate",
     "PeerScore",
@@ -18,14 +19,8 @@
     "Employed3Mo",
     "AcceptanceRate"
   ],
-  "inv_norm_vars": [],
-  "outlier_cap_features": [
-    "EmployedAtGrad",
-    "Employed3Mo",
-    "AvgSalaryBonus",
-    "MedianGPA",
-    "AcceptanceRate",
-    "PeerScore",
-    "RecruiterScore"
+  "outlier_exclude": [
+    "GMAT_Combined",
+    "SalaryByProfession"
   ]
 }

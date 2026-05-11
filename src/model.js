@@ -1,7 +1,8 @@
 /**
- * Client-side model inference engine.
- * Loads JSON artifacts exported by train_model.py and replicates
- * the full transform → predict → simulate pipeline in JavaScript.
+ * Client-side regression-only inference engine for the GWSB Ranking Predictor.
+ *
+ * Single bootstrapped ElasticNet engine + Monte Carlo rank simulator. The
+ * scoring path is: capper → log/logit → standardize → coef·x + intercept.
  */
 
 let modelConfig = null;
@@ -14,21 +15,20 @@ let featureRanges = null;
 let gmatCurves = null;
 let modelExplainability = null;
 
-/** Load all model artifacts from static JSON files */
-export async function loadModel() {
-  const base = '/model_artifacts';
-  const [config, capper, transformer, scaler, weights, snapshot, ranges, curves, expl] = await Promise.all([
-    fetch(`${base}/model_config.json`).then(r => r.json()),
-    fetch(`${base}/capper_bounds.json`).then(r => r.json()),
-    fetch(`${base}/transformer_config.json`).then(r => r.json()),
-    fetch(`${base}/scaler_params.json`).then(r => r.json()),
-    fetch(`${base}/model_weights.json`).then(r => r.json()),
-    fetch(`${base}/data_snapshot.json`).then(r => r.json()),
-    fetch(`${base}/feature_ranges.json`).then(r => r.json()),
-    fetch(`${base}/gmat_inference_curves.json`).then(r => r.json()).catch(() => null),
-    fetch(`${base}/model_explainability.json`).then(r => r.json()).catch(() => null),
-  ]);
+const ARTIFACTS_BASE = '/model_artifacts';
 
+export async function loadModel() {
+  const [config, capper, transformer, scaler, weights, snapshot, ranges, curves, expl] = await Promise.all([
+    fetch(`${ARTIFACTS_BASE}/model_config.json`).then(r => r.json()),
+    fetch(`${ARTIFACTS_BASE}/capper_bounds.json`).then(r => r.json()),
+    fetch(`${ARTIFACTS_BASE}/transformer_config.json`).then(r => r.json()),
+    fetch(`${ARTIFACTS_BASE}/scaler_params.json`).then(r => r.json()),
+    fetch(`${ARTIFACTS_BASE}/model_weights.json`).then(r => r.json()),
+    fetch(`${ARTIFACTS_BASE}/data_snapshot.json`).then(r => r.json()),
+    fetch(`${ARTIFACTS_BASE}/feature_ranges.json`).then(r => r.json()),
+    fetch(`${ARTIFACTS_BASE}/gmat_inference_curves.json`).then(r => r.json()).catch(() => null),
+    fetch(`${ARTIFACTS_BASE}/model_explainability.json`).then(r => r.json()).catch(() => null),
+  ]);
   modelConfig = config;
   capperBounds = capper;
   transformerConfig = transformer;
@@ -38,120 +38,117 @@ export async function loadModel() {
   featureRanges = ranges;
   gmatCurves = curves;
   modelExplainability = expl;
-
   return { modelConfig, featureRanges, dataSnapshot };
 }
 
-/** Get the loaded feature ranges */
-export function getFeatureRanges() {
-  return featureRanges;
+export function getFeatureRanges() { return featureRanges; }
+export function getGWUValues() { return featureRanges?._gwu_current || {}; }
+export function getGWUSchoolName() { return featureRanges?._gwu_school_name || 'George Washington University'; }
+export function getGWUCurrentRank() { return featureRanges?._gwu_current_rank || null; }
+export function getGWUCurrentScore() { return featureRanges?._gwu_current_score || null; }
+export function getGmatInputConfig() { return featureRanges?._gmat_input_config || {}; }
+export function getModelExplainability() { return modelExplainability; }
+export function getDataSnapshot() { return dataSnapshot; }
+export function getModelConfig() { return modelConfig; }
+
+/** Get SBP cohort means + slider config + occupation list. */
+export function getSbpConfig() {
+  return {
+    cohort:      featureRanges?._sbp_cohort      || {},
+    occupations: featureRanges?._sbp_occupations || [],
+    slider:      featureRanges?._sbp_slider      || { min: 60000, max: 260000, step: 1000, format: 'dollar' },
+  };
 }
 
-/** Get GWU current values */
-export function getGWUValues() {
-  return featureRanges?._gwu_current || {};
-}
-
-/** Get GWU school name */
-export function getGWUSchoolName() {
-  return featureRanges?._gwu_school_name || 'George Washington University';
-}
-
-/** Get GWU current rank */
-export function getGWUCurrentRank() {
-  return featureRanges?._gwu_current_rank || null;
-}
-
-/** Get GWU current score */
-export function getGWUCurrentScore() {
-  return featureRanges?._gwu_current_score || null;
-}
-
-/** Get GMAT input config (slider ranges, defaults) */
-export function getGmatInputConfig() {
-  return featureRanges?._gmat_input_config || {};
-}
-
-/** Get model explainability artifact */
-export function getModelExplainability() {
-  return modelExplainability;
-}
-
-/** Get GMAT/GRE percentile-rank curves (sorted score arrays from snapshot year) */
-export function getGmatCurves() {
-  return gmatCurves;
+/** Compute SBP ratio from per-occupation {salary, n} inputs. */
+export function computeSBPRatio(perOccupation) {
+  const cohort = featureRanges?._sbp_cohort || {};
+  const MIN_N = 3;
+  let ratio_sum = 0, n_sum = 0;
+  for (const [occ, info] of Object.entries(perOccupation || {})) {
+    const cm = cohort[occ]?.cohort_mean;
+    if (!cm || cm <= 0) continue;
+    const sal = Number(info?.salary);
+    const n = Number(info?.n);
+    if (!isFinite(sal) || sal <= 0 || !isFinite(n) || n < MIN_N) continue;
+    ratio_sum += (sal / cm) * n;
+    n_sum += n;
+  }
+  return n_sum > 0 ? ratio_sum / n_sum : null;
 }
 
 // ============================================================
-// GMAT/GRE BLENDED-SCORE COMPUTATION
-// (mirrors compute_blended_gmat_feature in train_model.py)
+// GMAT/GRE blended percentile (5-distribution, 40/40/20 GRE internal)
 // ============================================================
 
 const GMAT_BLEND_THRESHOLD = 0.25;
 
 function percentileRank(score, sortedArr) {
-  if (!sortedArr || sortedArr.length === 0 || score === null || score === undefined || Number.isNaN(score)) {
-    return 0;
-  }
-  // Binary search lower bound
+  if (!sortedArr || sortedArr.length === 0 || score == null || Number.isNaN(score)) return null;
   let lo = 0, hi = sortedArr.length;
   while (lo < hi) {
     const mid = (lo + hi) >>> 1;
-    if (sortedArr[mid] < score) lo = mid + 1;
-    else hi = mid;
+    if (sortedArr[mid] < score) lo = mid + 1; else hi = mid;
   }
-  // 'average' rank in [1, N]: count of values <= score / N (matching scipy rankdata/N)
-  // We approximate by midpoint of (count_strictly_less, count_le).
-  let lower = lo;
   let upper = lo;
   while (upper < sortedArr.length && sortedArr[upper] === score) upper++;
-  const avgRank = (lower + upper + 1) / 2; // 1-indexed average rank
-  return avgRank / sortedArr.length;
+  return (lo + upper + 1) / 2 / sortedArr.length;
 }
 
 /**
- * Compute the blended GMAT/GRE percentile score (0-100) from raw user inputs.
- * @param {Object} input - { scale: 'old'|'new', gmat_score: number|null, gre_total: number|null }
- * @returns {number} blended score in [0, 100]
+ * Cohort floor (lowest GMAT_Combined among reporting schools) used as a fallback
+ * when the user has not provided ANY test inputs (per-methodology missing-data
+ * rule). Sourced from the data snapshot at load time.
  */
-export function computeBlendedGMAT({ scale, gmat_score, gre_total }) {
-  if (!gmatCurves) {
-    // Fallback: passthrough if curves not available (shouldn't happen in prod)
-    return gmat_score ?? 0;
-  }
+function gmatCohortFloor() {
+  if (!dataSnapshot) return 0;
+  const vals = dataSnapshot.map(s => s.GMAT_Combined).filter(v => v != null && !Number.isNaN(v));
+  if (!vals.length) return 0;
+  return Math.min(...vals);
+}
+
+/**
+ * Compute the 0-100 blended GMAT/GRE percentile from raw user inputs.
+ * If neither GMAT nor GRE is provided -> cohort floor (matches official
+ * methodology missing-data rule).
+ */
+export function computeBlendedGMAT({ scale, gmat_score, gre_q, gre_v, gre_aw, gre_enabled, gmat_enabled = true }) {
+  if (!gmatCurves) return gmat_score ?? 0;
 
   let p_old = 0, p_new = 0, p_gre = 0;
-  let r_old = 0, r_new = 0, r_gre = 0;
+  let r_old = null, r_new = null, r_gre = null;
 
-  if (scale === 'old' && gmat_score !== null && gmat_score !== undefined && !Number.isNaN(gmat_score)) {
-    p_old = 1;
-    r_old = percentileRank(gmat_score, gmatCurves.gmat_old);
-  } else if (scale === 'new' && gmat_score !== null && gmat_score !== undefined && !Number.isNaN(gmat_score)) {
-    p_new = 1;
-    r_new = percentileRank(gmat_score, gmatCurves.gmat_new);
+  if (gmat_enabled && gmat_score != null) {
+    if (scale === 'old') {
+      r_old = percentileRank(gmat_score, gmatCurves.gmat_old);
+      if (r_old !== null) p_old = 1;
+    } else if (scale === 'new') {
+      r_new = percentileRank(gmat_score, gmatCurves.gmat_new);
+      if (r_new !== null) p_new = 1;
+    }
+  }
+  if (gre_enabled) {
+    const rq = gre_q != null ? percentileRank(gre_q, gmatCurves.gre_q) : null;
+    const rv = gre_v != null ? percentileRank(gre_v, gmatCurves.gre_v) : null;
+    const ra = gre_aw != null ? percentileRank(gre_aw, gmatCurves.gre_aw) : null;
+    if (rq !== null && rv !== null && ra !== null) r_gre = 0.4 * rq + 0.4 * rv + 0.2 * ra;
+    else if (rq !== null && rv !== null) r_gre = 0.5 * rq + 0.5 * rv;
+    else if (rq !== null) r_gre = rq;
+    else if (rv !== null) r_gre = rv;
+    if (r_gre !== null) p_gre = 1;
   }
 
-  if (gre_total !== null && gre_total !== undefined && !Number.isNaN(gre_total)) {
-    p_gre = 1;
-    r_gre = percentileRank(gre_total, gmatCurves.gre_total);
-  }
+  const total = p_old + p_new + p_gre;
+  if (total <= 0) return gmatCohortFloor();   // No inputs → cohort floor
 
-  const totalPct = p_old + p_new + p_gre;
-  if (totalPct <= 0) return 0;
-
-  let blended = (p_old * r_old + p_new * r_new + p_gre * r_gre) / totalPct;
-  if (totalPct < GMAT_BLEND_THRESHOLD) {
-    blended *= totalPct / GMAT_BLEND_THRESHOLD;
-  }
+  let blended = (p_old * (r_old || 0) + p_new * (r_new || 0) + p_gre * (r_gre || 0)) / total;
   return Math.max(0, Math.min(100, blended * 100));
 }
 
 // ============================================================
-// TRANSFORM PIPELINE (mirrors Python's OutlierCapper → 
-// RankingFeatureTransformer → StandardScaler)
+// Regression scoring path
 // ============================================================
 
-/** Apply OutlierCapper: clip values to learned percentile bounds */
 function applyCapper(row) {
   const result = { ...row };
   for (const [col, bounds] of Object.entries(capperBounds)) {
@@ -162,97 +159,55 @@ function applyCapper(row) {
   return result;
 }
 
-/** Apply RankingFeatureTransformer: log, logit, inv_norm transforms */
 function applyTransformer(row) {
   const result = { ...row };
-
-  // Log transformation: log1p(x)
-  for (const col of transformerConfig.log_cols) {
-    if (col in result) {
-      result[col] = Math.log1p(result[col]);
-    }
+  for (const col of transformerConfig.log_cols || []) {
+    if (col in result) result[col] = Math.log1p(result[col]);
   }
-
-  // Logit transformation: log(p / (1-p))
-  for (const col of transformerConfig.logit_cols) {
+  for (const col of transformerConfig.logit_cols || []) {
     if (col in result) {
-      let p = Math.max(0.001, Math.min(0.999, result[col]));
+      const p = Math.max(0.001, Math.min(0.999, result[col]));
       result[col] = Math.log(p / (1 - p));
     }
   }
-
-  // Inverse Normal transformation (not used in 8-feature model, but included for completeness)
-  for (const col of transformerConfig.inv_norm_cols) {
-    if (col in result) {
-      const N = transformerConfig.rank_counts[col] || 120;
-      let percentile = (result[col] - 0.5) / N;
-      percentile = Math.max(0.001, Math.min(0.999, percentile));
-      result[col] = -1 * normPPF(percentile);
-    }
-  }
-
   return result;
 }
 
-/** Apply StandardScaler: (x - mean) / scale */
 function applyScaler(row) {
   const features = scalerParams.feature_names;
-  const values = features.map((feat, i) => {
-    return (row[feat] - scalerParams.mean[i]) / scalerParams.scale[i];
-  });
-  return values;
+  return features.map((f, i) => (row[f] - scalerParams.mean[i]) / scalerParams.scale[i]);
 }
 
-/** Full prediction: capper → transformer → scaler → dot product + intercept */
 function predictScore(row) {
   const capped = applyCapper(row);
   const transformed = applyTransformer(capped);
   const scaled = applyScaler(transformed);
-  
-  let score = modelWeights.intercept;
-  for (let i = 0; i < scaled.length; i++) {
-    score += scaled[i] * modelWeights.coef[i];
-  }
-  return score;
+  let s = modelWeights.intercept;
+  for (let i = 0; i < scaled.length; i++) s += scaled[i] * modelWeights.coef[i];
+  return s;
 }
 
 // ============================================================
-// MONTE CARLO RANK SIMULATION
-// (mirrors simulate_advanced_rank from rank_scenario_planning.ipynb)
+// Monte Carlo rank simulation
 // ============================================================
 
-/**
- * Simulate rank for a school with custom metrics.
- * @param {Object} customMetrics - Feature values to use for the target school
- * @param {string} targetSchool - School name to simulate (default: GWU)
- * @param {number} nSimulations - Number of Monte Carlo iterations
- * @returns {Object} Results including medianRank, CI, score, distribution
- */
 export function simulateRank(customMetrics, targetSchool = null, nSimulations = 10000) {
-  if (!dataSnapshot || !modelWeights) {
-    throw new Error('Model not loaded. Call loadModel() first.');
-  }
-
+  if (!dataSnapshot) throw new Error('Model not loaded.');
   targetSchool = targetSchool || getGWUSchoolName();
-
-  // 1. Find target school index
   const targetIdx = dataSnapshot.findIndex(s => s.School === targetSchool);
-  if (targetIdx === -1) {
-    throw new Error(`School "${targetSchool}" not found in dataset.`);
-  }
+  if (targetIdx === -1) throw new Error(`School "${targetSchool}" not found.`);
 
-  // 2. Build simulation data with custom metrics applied
   const simData = dataSnapshot.map((school, i) => {
     if (i === targetIdx) {
-      // Apply custom metrics to target school
       const modified = { ...school };
-      for (const [key, val] of Object.entries(customMetrics)) {
-        // Special-case: GMAT_Combined may arrive as either a scalar (already-blended 0-100)
-        // or as a composite object {scale, gmat_score, gre_total} from the slider UI.
-        if (key === 'GMAT_Combined' && val !== null && typeof val === 'object') {
-          modified[key] = computeBlendedGMAT(val);
+      for (const [k, v] of Object.entries(customMetrics)) {
+        if (k === 'GMAT_Combined' && v !== null && typeof v === 'object') {
+          modified[k] = computeBlendedGMAT(v);
+        } else if (k === 'SalaryByProfession' && v !== null && typeof v === 'object') {
+          const ratio = computeSBPRatio(v);
+          if (ratio !== null) modified[k] = ratio;
         } else {
-          modified[key] = val;
+          modified[k] = v;
         }
       }
       return modified;
@@ -260,149 +215,55 @@ export function simulateRank(customMetrics, targetSchool = null, nSimulations = 
     return { ...school };
   });
 
-  // 3. Predict scores for all schools using residual anchoring
   const baseScores = simData.map((school, i) => {
     const trueScore = dataSnapshot[i].OverallScore;
-    
-    // Baseline prediction using original features
     const baselineFeatures = {};
-    for (const feat of modelConfig.features) {
-      baselineFeatures[feat] = dataSnapshot[i][feat];
-    }
-    const baselinePredicted = predictScore(baselineFeatures);
-    
-    // Calculate residual (True - Predicted)
-    const residual = (trueScore !== undefined && trueScore !== null && !isNaN(trueScore)) 
-      ? (trueScore - baselinePredicted) 
-      : 0;
-
-    // Simulation prediction using modified features
+    for (const f of modelConfig.features) baselineFeatures[f] = dataSnapshot[i][f];
+    const baselinePred = predictScore(baselineFeatures);
+    const residual = (trueScore != null && !Number.isNaN(trueScore)) ? (trueScore - baselinePred) : 0;
     const simFeatures = {};
-    for (const feat of modelConfig.features) {
-      simFeatures[feat] = school[feat];
-    }
-    const simPredicted = predictScore(simFeatures);
-
-    // Anchored score = New Prediction + Historical Residual
-    return simPredicted + residual;
+    for (const f of modelConfig.features) simFeatures[f] = school[f];
+    return predictScore(simFeatures) + residual;
   });
 
-  // 4. Setup volatility (tiered noise)
-  const noiseScale = simData.map((school, i) => {
-    if (i === targetIdx) return 0; // Target is deterministic
-    const rank = school.Rank;
-    if (rank <= 20) return 0.8;
-    if (rank <= 50) return 1.5;
+  const noiseScale = simData.map((s, i) => {
+    if (i === targetIdx) return 0;
+    const r = s.Rank;
+    if (r <= 20) return 0.8;
+    if (r <= 50) return 1.5;
     return 2.5;
   });
 
-  // 5. Monte Carlo loop
   const predictedRanks = [];
   const n = baseScores.length;
-
   for (let sim = 0; sim < nSimulations; sim++) {
-    // Generate noise
-    const scenarioScores = baseScores.map((score, i) => {
-      return score + gaussianRandom() * noiseScale[i];
-    });
-
-    // Sort descending to get ranks (highest score = rank 1)
-    const indices = Array.from({ length: n }, (_, i) => i);
-    indices.sort((a, b) => scenarioScores[b] - scenarioScores[a]);
-
-    // Find target's rank
-    const rank = indices.indexOf(targetIdx) + 1;
-    predictedRanks.push(rank);
+    const scenario = baseScores.map((s, i) => s + gaussianRandom() * noiseScale[i]);
+    const idx = Array.from({ length: n }, (_, i) => i);
+    idx.sort((a, b) => scenario[b] - scenario[a]);
+    predictedRanks.push(idx.indexOf(targetIdx) + 1);
   }
-
-  // 6. Compile results
   predictedRanks.sort((a, b) => a - b);
-
-  const medianRank = predictedRanks[Math.floor(predictedRanks.length / 2)];
+  const median = predictedRanks[Math.floor(predictedRanks.length / 2)];
   const p5 = predictedRanks[Math.floor(predictedRanks.length * 0.05)];
   const p95 = predictedRanks[Math.floor(predictedRanks.length * 0.95)];
-  const scenarioScore = baseScores[targetIdx];
 
-  // Build histogram data for chart
-  const rankCounts = {};
-  for (const r of predictedRanks) {
-    rankCounts[r] = (rankCounts[r] || 0) + 1;
-  }
-  
-  // Convert to probability
+  const counts = {};
+  for (const r of predictedRanks) counts[r] = (counts[r] || 0) + 1;
   const distribution = {};
-  for (const [rank, count] of Object.entries(rankCounts)) {
-    distribution[rank] = count / nSimulations;
-  }
+  for (const [r, c] of Object.entries(counts)) distribution[r] = c / nSimulations;
 
   return {
-    medianRank,
+    medianRank: median,
     range90: [p5, p95],
-    scenarioScore: Math.round(scenarioScore * 100) / 100,
+    scenarioScore: Math.round(baseScores[targetIdx] * 100) / 100,
     rankDistribution: distribution,
     rawRanks: predictedRanks,
   };
 }
 
-// ============================================================
-// MATH UTILITIES
-// ============================================================
-
-/** Box-Muller transform for generating standard normal random numbers */
 function gaussianRandom() {
   let u = 0, v = 0;
   while (u === 0) u = Math.random();
   while (v === 0) v = Math.random();
   return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-}
-
-/**
- * Approximate inverse normal CDF (PPF) using rational approximation.
- * Accurate to ~1e-9 for 0 < p < 1.
- */
-function normPPF(p) {
-  if (p <= 0) return -Infinity;
-  if (p >= 1) return Infinity;
-  if (p === 0.5) return 0;
-
-  // Rational approximation by Peter Acklam
-  const a = [
-    -3.969683028665376e+01, 2.209460984245205e+02,
-    -2.759285104469687e+02, 1.383577518672690e+02,
-    -3.066479806614716e+01, 2.506628277459239e+00
-  ];
-  const b = [
-    -5.447609879822406e+01, 1.615858368580409e+02,
-    -1.556989798598866e+02, 6.680131188771972e+01,
-    -1.328068155288572e+01
-  ];
-  const c = [
-    -7.784894002430293e-03, -3.223964580411365e-01,
-    -2.400758277161838e+00, -2.549732539343734e+00,
-    4.374664141464968e+00, 2.938163982698783e+00
-  ];
-  const d = [
-    7.784695709041462e-03, 3.224671290700398e-01,
-    2.445134137142996e+00, 3.754408661907416e+00
-  ];
-
-  const pLow = 0.02425;
-  const pHigh = 1 - pLow;
-
-  let q, r;
-
-  if (p < pLow) {
-    q = Math.sqrt(-2 * Math.log(p));
-    return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) /
-           ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
-  } else if (p <= pHigh) {
-    q = p - 0.5;
-    r = q * q;
-    return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q /
-           (((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
-  } else {
-    q = Math.sqrt(-2 * Math.log(1 - p));
-    return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) /
-            ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
-  }
 }

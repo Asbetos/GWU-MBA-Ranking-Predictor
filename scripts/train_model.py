@@ -1,17 +1,39 @@
 """
-GWU Ranking Predictor - Model Training Script
-==============================================
-Two-year (2024 + 2025) training pipeline with US-News-style GMAT/GRE blended
-percentile transformation.
+GWSB Ranking Predictor — Regression Training Pipeline
+======================================================
+Single bootstrapped ElasticNet engine over 9 indicators on the stacked
+2024 + 2025 panel. The regression replaces the full US News scoring
+methodology with a learned linear approximation calibrated so the rank-1
+school maps to a score of 100. The Monte Carlo rank simulator wraps the
+regression score with tiered Gaussian volatility.
 
-Steps:
-  1a. Load 2024 + 2025 CSVs, rename columns, parse GRE ranges, KNN-impute per-year,
-      compute blended GMAT_Combined feature (per-year percentile ranks weighted by
-      submission percentages, with <25% submission penalty).
-  1b. Train USNewsRankingSystem (OutlierCapper -> RankingFeatureTransformer ->
-      StandardScaler -> Bootstrapped ElasticNetCV -> Calibration).
-  2.  Export 9 model artifacts as JSON for the JS serverless backend, including
-      model_explainability.json and gmat_inference_curves.json.
+Indicators (9):
+  EmployedAtGrad, Employed3Mo, AvgSalaryBonus, SalaryByProfession,
+  MedianGPA, AcceptanceRate, PeerScore, RecruiterScore, GMAT_Combined.
+
+Pre-pipeline feature engineering:
+  - Salary-by-Profession indicator: per-occupation ratio
+    school_avg / cohort_weighted_avg, weighted by reporters per occupation,
+    excluding "Other" and any occupation with <3 reporters.
+  - GMAT_Combined: per-year percentile rank for {GMAT_old, GMAT_new, GRE Q,
+    GRE V, GRE AW}, GRE-internal 40/40/20 blend, then submission-proportion
+    blend across exams (renormalised); scaled to 0-100. Schools with no
+    submitted scores get the per-year cohort floor.
+  - All other indicators are imputed per-year via KNN (n_neighbors=5).
+
+Pipeline:
+  OutlierCapper(5%/95%, excluding GMAT_Combined and SalaryByProfession)
+    → log1p(AvgSalaryBonus)
+    → logit(EmployedAtGrad, Employed3Mo, AcceptanceRate)
+    → StandardScaler
+    → bootstrapped ElasticNetCV (10,000 iterations, l1_ratio grid, 5-fold CV)
+    → mean coefficients
+    → calibrate intercept so rank-1 school = 100
+
+Outputs (public/model_artifacts/):
+  model_config, capper_bounds, transformer_config, scaler_params,
+  model_weights, data_snapshot, gmat_inference_curves, feature_ranges,
+  model_explainability.
 """
 
 import os
@@ -27,7 +49,7 @@ from sklearn.impute import KNNImputer
 from sklearn.linear_model import ElasticNetCV, LinearRegression
 from sklearn.utils import resample
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
-from scipy.stats import spearmanr, norm, rankdata
+from scipy.stats import spearmanr, rankdata
 from joblib import Parallel, delayed
 
 # ============================================================
@@ -39,7 +61,55 @@ DATA_PATHS = {
     2025: os.path.join(SCRIPT_DIR, '..', '..', 'all_schools_flat_2025.csv'),
 }
 OUTPUT_DIR = os.path.join(SCRIPT_DIR, '..', 'public', 'model_artifacts')
-INFERENCE_CURVE_YEAR = 2025  # Year used for client-side percentile lookups
+INFERENCE_CURVE_YEAR = 2025
+
+ALL_FEATURES = [
+    'EmployedAtGrad', 'Employed3Mo', 'AvgSalaryBonus', 'SalaryByProfession',
+    'MedianGPA', 'AcceptanceRate', 'PeerScore', 'RecruiterScore',
+    'GMAT_Combined',
+]
+TARGET = 'OverallScore'
+
+# Salary-by-profession excluded categories
+EXCLUDED_OCCUPATIONS = {'Other'}
+MIN_OCCUPATION_REPORTERS = 3
+
+# Regression preprocessing
+LOG_VARS = ['AvgSalaryBonus']
+LOGIT_VARS = ['EmployedAtGrad', 'Employed3Mo', 'AcceptanceRate']
+# Pre-bounded features (already on a percentile / ratio scale) — exclude from outlier capping
+OUTLIER_EXCLUDE = {'GMAT_Combined', 'SalaryByProfession'}
+N_BOOTSTRAP_ITERATIONS = 10000
+N_JOBS = 4
+
+GMAT_INPUT_CONFIG = {
+    'gmat_scale_default': 'old',
+    'gmat_old_range': {'min': 200, 'max': 800, 'step': 5},
+    'gmat_new_range': {'min': 205, 'max': 805, 'step': 5},
+    'gre_q_range':    {'min': 130, 'max': 170, 'step': 1},
+    'gre_v_range':    {'min': 130, 'max': 170, 'step': 1},
+    'gre_aw_range':   {'min': 0.0, 'max': 6.0, 'step': 0.5},
+    'gre_default_enabled': False,
+}
+
+SBP_OCCUPATIONS = [
+    'Consulting', 'Finance / Accounting', 'General Management',
+    'Marketing / Sales', 'Operations / Production',
+    'Management Information Systems (MIS)', 'Human Resources',
+]
+SBP_SLIDER = {'min': 60000, 'max': 260000, 'step': 1000, 'format': 'dollar'}
+
+SLIDER_RANGES = {
+    'EmployedAtGrad':      {'min': 0.20, 'max': 1.00, 'step': 0.01, 'label': 'Employed at Graduation', 'format': 'percent'},
+    'Employed3Mo':         {'min': 0.20, 'max': 1.00, 'step': 0.01, 'label': 'Employed 3 Months After', 'format': 'percent'},
+    'AvgSalaryBonus':      {'min': 80000, 'max': 220000, 'step': 1000, 'label': 'Avg Salary + Bonus ($)', 'format': 'dollar'},
+    'SalaryByProfession':  {'min': 0.6, 'max': 1.4, 'step': 0.01, 'label': 'Salary by Profession (cohort ratio)', 'format': 'number'},
+    'MedianGPA':           {'min': 3.0, 'max': 4.0, 'step': 0.01, 'label': 'Median GPA', 'format': 'number'},
+    'AcceptanceRate':      {'min': 0.05, 'max': 1.00, 'step': 0.01, 'label': 'Acceptance Rate', 'format': 'percent'},
+    'PeerScore':           {'min': 1.0, 'max': 5.0, 'step': 0.1,  'label': 'Peer Assessment Score', 'format': 'number'},
+    'RecruiterScore':      {'min': 1.0, 'max': 5.0, 'step': 0.1,  'label': 'Recruiter Assessment Score', 'format': 'number'},
+    'GMAT_Combined':       {'min': 0,   'max': 100, 'step': 1,    'label': 'GMAT/GRE Blended Percentile', 'format': 'number'},
+}
 
 COLUMN_RENAME_MAP = {
     'school_info.school_name': 'School',
@@ -60,51 +130,170 @@ COLUMN_RENAME_MAP = {
     'gre_data.gre_score_range_10th_90th': 'GRE_Range_Str',
 }
 
-COLUMNS_TO_DROP = [
-    'school_info.us_news_rank_out_of',
-    'ranking_scores_two_year_averages.salaries_by_profession_indicator_rank',
-]
-
-ALL_FEATURES = [
-    'EmployedAtGrad', 'Employed3Mo', 'AvgSalaryBonus',
-    'MedianGPA', 'AcceptanceRate', 'PeerScore',
-    'RecruiterScore', 'GMAT_Combined'
-]
-TARGET = 'OverallScore'
-
-LOG_VARS = ['AvgSalaryBonus']  # GMAT_Combined removed - now bounded 0-100
-LOGIT_VARS = ['EmployedAtGrad', 'Employed3Mo', 'AcceptanceRate']
-INV_NORM_VARS = []
-OUTLIER_CAP_FEATURES = [f for f in ALL_FEATURES if f != 'GMAT_Combined']  # blended score already bounded
-
-GMAT_BLEND_THRESHOLD = 0.25  # min total submission % before penalty
-N_BOOTSTRAP_ITERATIONS = 10000
-N_JOBS = 4
-
-# Inference-side input config (consumed by frontend via feature_ranges.json)
-GMAT_INPUT_CONFIG = {
-    'gmat_scale_default': 'old',
-    'gmat_old_range': {'min': 500, 'max': 800, 'step': 5},
-    'gmat_new_range': {'min': 505, 'max': 805, 'step': 5},
-    'gre_range':      {'min': 280, 'max': 340, 'step': 1},
-    'gre_default_enabled': False,
-}
-
-SLIDER_RANGES = {
-    'EmployedAtGrad':  {'min': 0.20, 'max': 1.00, 'step': 0.01, 'label': 'Employed at Graduation', 'format': 'percent'},
-    'Employed3Mo':     {'min': 0.20, 'max': 1.00, 'step': 0.01, 'label': 'Employed 3 Months After', 'format': 'percent'},
-    'AvgSalaryBonus':  {'min': 80000, 'max': 220000, 'step': 1000, 'label': 'Avg Salary + Bonus ($)', 'format': 'dollar'},
-    'MedianGPA':       {'min': 3.0,  'max': 4.0,  'step': 0.01, 'label': 'Median GPA', 'format': 'number'},
-    'AcceptanceRate':  {'min': 0.05, 'max': 1.00, 'step': 0.01, 'label': 'Acceptance Rate', 'format': 'percent'},
-    'PeerScore':       {'min': 1.0,  'max': 5.0,  'step': 0.1,  'label': 'Peer Assessment Score', 'format': 'number'},
-    'RecruiterScore':  {'min': 1.0,  'max': 5.0,  'step': 0.1,  'label': 'Recruiter Assessment Score', 'format': 'number'},
-    # GMAT_Combined slider is rendered as a composite control on the frontend; the
-    # data_min/data_max from feature_ranges.json still describe the blended-score range.
-    'GMAT_Combined':   {'min': 0,    'max': 100,  'step': 1,    'label': 'GMAT/GRE Blended Percentile Score', 'format': 'number'},
-}
 
 # ============================================================
-# 1. CUSTOM TRANSFORMERS
+# GRE PARSING (verbal, quantitative, analytical writing)
+# ============================================================
+
+def parse_gre_components(s):
+    """Parse 'NN-NN verbal, NN-NN quantitative, F.F-F.F writing' -> (V_mid, Q_mid, AW_mid).
+    Returns (None, None, None) on missing/empty/unparsable input.
+    """
+    if not isinstance(s, str) or not s.strip():
+        return (None, None, None)
+    text = s.lower()
+    out = {'verbal': None, 'quant': None, 'writing': None}
+    for m in re.finditer(r'(\d{1,3}(?:\.\d+)?)\s*[-–]\s*(\d{1,3}(?:\.\d+)?)\s*([a-z]+)?', text):
+        try:
+            lo, hi = float(m.group(1)), float(m.group(2))
+        except ValueError:
+            continue
+        lbl = (m.group(3) or '').lower()
+        mid = (lo + hi) / 2.0
+        if 'verbal' in lbl: out['verbal'] = mid
+        elif 'quant' in lbl: out['quant'] = mid
+        elif 'writ' in lbl: out['writing'] = mid
+    return (out['verbal'], out['quant'], out['writing'])
+
+
+# ============================================================
+# GMAT/GRE BLENDED PERCENTILE
+# ============================================================
+
+def _percentile_rank(values):
+    out = np.full(len(values), np.nan)
+    mask = ~np.isnan(values)
+    if mask.sum() == 0:
+        return out
+    ranks = rankdata(values[mask], method='average') / float(mask.sum())
+    out[mask] = ranks
+    return out
+
+
+def compute_gmat_gre_blend(df, year_col='Year'):
+    """Per-year percentile rank for GMAT_Old, GMAT_New, GRE_Q, GRE_V, GRE_AW;
+    GRE-internal blend = 0.4Q + 0.4V + 0.2AW; cross-exam blend weighted by
+    each school's submission proportions; scaled to 0-100. NaN handled by
+    leaving GMAT_Combined as NaN here (cohort-floor fallback is applied later
+    in preprocess()).
+    """
+    df = df.copy()
+
+    if 'GRE_Range_Str' in df.columns:
+        comps = df['GRE_Range_Str'].apply(parse_gre_components)
+        df['GRE_V'] = comps.apply(lambda t: t[0])
+        df['GRE_Q'] = comps.apply(lambda t: t[1])
+        df['GRE_AW'] = comps.apply(lambda t: t[2])
+    else:
+        df['GRE_V'] = np.nan
+        df['GRE_Q'] = np.nan
+        df['GRE_AW'] = np.nan
+
+    for col in ('Pct_GMAT_Old', 'Pct_GMAT_New', 'Pct_GRE'):
+        if col not in df.columns:
+            df[col] = 0.0
+        m = df[col].dropna().max() if df[col].notna().any() else 0
+        if m is not None and m > 1.5:  # treat as percent → fraction
+            df[col] = df[col] / 100.0
+        df[col] = df[col].fillna(0.0).clip(0.0, 1.0)
+
+    score_to_rank = [
+        ('GMAT_Old', 'rank_gmat_old'), ('GMAT_New', 'rank_gmat_new'),
+        ('GRE_Q', 'rank_gre_q'), ('GRE_V', 'rank_gre_v'), ('GRE_AW', 'rank_gre_aw'),
+    ]
+    for _, rc in score_to_rank:
+        df[rc] = np.nan
+
+    for year, sub in df.groupby(year_col):
+        for sc, rc in score_to_rank:
+            if sc not in df.columns:
+                continue
+            df.loc[sub.index, rc] = _percentile_rank(sub[sc].astype(float).values)
+
+    gre_pct = 0.4 * df['rank_gre_q'] + 0.4 * df['rank_gre_v'] + 0.2 * df['rank_gre_aw']
+    fallback = 0.5 * df['rank_gre_q'].fillna(np.nan) + 0.5 * df['rank_gre_v'].fillna(np.nan)
+    df['rank_gre'] = gre_pct.where(gre_pct.notna(), fallback)
+
+    p_old = df['Pct_GMAT_Old'].values
+    p_new = df['Pct_GMAT_New'].values
+    p_gre = df['Pct_GRE'].values
+    r_old = df['rank_gmat_old'].values
+    r_new = df['rank_gmat_new'].values
+    r_gre = df['rank_gre'].values
+
+    p_old_eff = np.where(np.isnan(r_old), 0.0, p_old)
+    p_new_eff = np.where(np.isnan(r_new), 0.0, p_new)
+    p_gre_eff = np.where(np.isnan(r_gre), 0.0, p_gre)
+    r_old_eff = np.where(np.isnan(r_old), 0.0, r_old)
+    r_new_eff = np.where(np.isnan(r_new), 0.0, r_new)
+    r_gre_eff = np.where(np.isnan(r_gre), 0.0, r_gre)
+
+    total = p_old_eff + p_new_eff + p_gre_eff
+    weighted = p_old_eff * r_old_eff + p_new_eff * r_new_eff + p_gre_eff * r_gre_eff
+    with np.errstate(divide='ignore', invalid='ignore'):
+        blended = np.where(total > 0, weighted / total, np.nan)
+
+    df['GMAT_Combined'] = blended * 100.0
+    return df
+
+
+# ============================================================
+# SALARY-BY-PROFESSION INDICATOR
+# ============================================================
+
+def compute_salary_by_profession(df, year_col='Year'):
+    """Per-school weighted average of (school_avg / cohort_weighted_avg) per
+    occupation, weighted by the school's reporters per occupation. Excludes
+    'Other' and any occupation with <3 reporters. Computed per-year so 2024
+    salaries are compared against the 2024 cohort.
+    """
+    occ_idx = list(range(8))
+    sba = pd.Series(np.nan, index=df.index, dtype=float)
+
+    for year, sub in df.groupby(year_col):
+        per_occ = {}
+        for i in occ_idx:
+            occ_col = f'base_salary_by_occupation[{i}].occupation'
+            sal_col = f'base_salary_by_occupation[{i}].average_salary'
+            n_col   = f'base_salary_by_occupation[{i}].number_reporting_jobs'
+            if occ_col not in sub.columns:
+                continue
+            for idx, row in sub.iterrows():
+                occ = row[occ_col]; sal = row[sal_col]; n = row[n_col]
+                if not isinstance(occ, str) or pd.isna(sal) or pd.isna(n): continue
+                if occ.strip() in EXCLUDED_OCCUPATIONS: continue
+                if n < MIN_OCCUPATION_REPORTERS: continue
+                per_occ.setdefault(occ.strip(), []).append((idx, float(sal), float(n)))
+
+        cohort_means = {}
+        for k, rows in per_occ.items():
+            ntot = sum(r[2] for r in rows)
+            if ntot > 0:
+                cohort_means[k] = sum(r[1] * r[2] for r in rows) / ntot
+
+        for idx, row in sub.iterrows():
+            ratio_sum, n_sum = 0.0, 0.0
+            for i in occ_idx:
+                occ_col = f'base_salary_by_occupation[{i}].occupation'
+                sal_col = f'base_salary_by_occupation[{i}].average_salary'
+                n_col   = f'base_salary_by_occupation[{i}].number_reporting_jobs'
+                if occ_col not in sub.columns: continue
+                occ = row[occ_col]; sal = row[sal_col]; n = row[n_col]
+                if not isinstance(occ, str) or pd.isna(sal) or pd.isna(n): continue
+                k = occ.strip()
+                if k in EXCLUDED_OCCUPATIONS or n < MIN_OCCUPATION_REPORTERS: continue
+                if k not in cohort_means or cohort_means[k] <= 0: continue
+                ratio = float(sal) / cohort_means[k]
+                ratio_sum += ratio * float(n)
+                n_sum += float(n)
+            if n_sum > 0:
+                sba.loc[idx] = ratio_sum / n_sum
+
+    return sba
+
+
+# ============================================================
+# CUSTOM TRANSFORMERS
 # ============================================================
 
 class OutlierCapper(BaseEstimator, TransformerMixin):
@@ -118,519 +307,192 @@ class OutlierCapper(BaseEstimator, TransformerMixin):
             if col in X.columns:
                 self.caps_[col] = (
                     float(X[col].quantile(self.limits[0])),
-                    float(X[col].quantile(1 - self.limits[1]))
+                    float(X[col].quantile(1 - self.limits[1])),
                 )
         return self
 
     def transform(self, X):
-        X_trans = X.copy()
-        for col, (lower, upper) in self.caps_.items():
-            if col in X_trans.columns:
-                X_trans[col] = X_trans[col].clip(lower, upper)
-        return X_trans
+        X_t = X.copy()
+        for col, (lo, hi) in self.caps_.items():
+            if col in X_t.columns:
+                X_t[col] = X_t[col].clip(lo, hi)
+        return X_t
 
 
-class RankingFeatureTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, log_cols, logit_cols, inv_norm_cols):
+class FeatureTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, log_cols, logit_cols):
         self.log_cols = log_cols
         self.logit_cols = logit_cols
-        self.inv_norm_cols = inv_norm_cols
-        self.rank_counts_ = {}
 
     def fit(self, X, y=None):
-        for col in self.inv_norm_cols:
-            if col in X.columns:
-                self.rank_counts_[col] = float(X[col].max())
         return self
 
     def transform(self, X):
-        X_trans = X.copy()
-        inv_norm_cols = getattr(self, 'inv_norm_cols', [])
-        rank_counts = getattr(self, 'rank_counts_', {})
-
-        for col in self.log_cols:
-            if col in X_trans.columns:
-                X_trans[col] = np.log1p(X_trans[col])
-
-        for col in self.logit_cols:
-            if col in X_trans.columns:
-                p = X_trans[col].clip(0.001, 0.999)
-                X_trans[col] = np.log(p / (1 - p))
-
-        for col in inv_norm_cols:
-            if col in X_trans.columns:
-                N = rank_counts.get(col, 120)
-                percentile = ((X_trans[col] - 0.5) / N).clip(0.001, 0.999)
-                X_trans[col] = -1 * norm.ppf(percentile)
-
-        return X_trans
+        X_t = X.copy()
+        for c in self.log_cols:
+            if c in X_t.columns:
+                X_t[c] = np.log1p(X_t[c])
+        for c in self.logit_cols:
+            if c in X_t.columns:
+                p = X_t[c].clip(0.001, 0.999)
+                X_t[c] = np.log(p / (1 - p))
+        return X_t
 
 
 # ============================================================
-# 2. PARALLEL BOOTSTRAP HELPER
+# BOOTSTRAP HELPER
 # ============================================================
+
+# Sign constraints by feature. All features default to 'positive' (higher
+# value → higher predicted score). AcceptanceRate is 'negative' (lower
+# acceptance → more selective → higher predicted score). The bootstrap fits a
+# constrained ElasticNet on a sign-flipped copy of the AcceptanceRate column;
+# the resulting coefficient is then flipped back to the original sign in the
+# final coefficient vector. This prevents tiny collinearity-driven noise from
+# producing counterintuitive directions (e.g. GMAT_Combined sliding the rank
+# the wrong way).
+SIGN_FLIP_FEATURES = ['AcceptanceRate']
 
 def _run_single_bootstrap(X, y):
-    X_b, y_b = resample(X, y)
-    en = ElasticNetCV(l1_ratio=[.1, .5, .7, .9, .95, .99, 1], cv=5, max_iter=10000, n_jobs=1)
-    en.fit(X_b, y_b)
+    Xb, yb = resample(X, y)
+    en = ElasticNetCV(l1_ratio=[.1, .5, .7, .9, .95, .99, 1], cv=5, max_iter=10000, n_jobs=1, positive=True)
+    en.fit(Xb, yb)
     return en.coef_
 
 
 # ============================================================
-# 3. CORE RANKING SYSTEM
+# REGRESSION RANKER
 # ============================================================
 
-class USNewsRankingSystem:
-    def __init__(self, features, target, log_vars, logit_vars, inv_norm_vars,
-                 outlier_features=None, n_iterations=100, n_jobs=-1):
+class RegressionRanker:
+    def __init__(self, features, n_iterations=N_BOOTSTRAP_ITERATIONS, n_jobs=N_JOBS):
         self.features = features
-        self.target = target
         self.n_iterations = n_iterations
         self.n_jobs = n_jobs
-        cap_cols = outlier_features if outlier_features is not None else features
+        cap_cols = [f for f in features if f not in OUTLIER_EXCLUDE]
         self.pipeline = Pipeline([
             ('outliers', OutlierCapper(columns=cap_cols)),
-            ('transform', RankingFeatureTransformer(log_vars, logit_vars, inv_norm_vars)),
-            ('scale', StandardScaler())
+            ('transform', FeatureTransformer(LOG_VARS, LOGIT_VARS)),
+            ('scale', StandardScaler()),
         ])
         self.engine = LinearRegression()
         self.bootstrap_history_ = None
 
-    def fit_and_calibrate(self, df, global_top_ref):
-        if isinstance(global_top_ref, pd.Series):
-            global_top_ref = global_top_ref.to_frame().T
+    def fit_and_calibrate(self, df, target, top_anchor):
+        if isinstance(top_anchor, pd.Series):
+            top_anchor = top_anchor.to_frame().T
+        Xp = self.pipeline.fit_transform(df[self.features])
+        y = df[target].values
 
-        X_processed = self.pipeline.fit_transform(df[self.features])
-        y = df[self.target].values
+        # Sign-flip "lower is better" features before constrained fitting so
+        # every coefficient produced by ElasticNet(positive=True) corresponds
+        # to a "higher → better" relationship. We flip the resulting
+        # coefficients back at the end.
+        flip_idx = [i for i, f in enumerate(self.features) if f in SIGN_FLIP_FEATURES]
+        Xp_train = Xp.copy()
+        for i in flip_idx:
+            Xp_train[:, i] = -Xp_train[:, i]
 
-        print(f"Bootstrapping {self.n_iterations} iterations using {self.n_jobs} cores...")
-
-        coef_list = Parallel(n_jobs=self.n_jobs)(
-            delayed(_run_single_bootstrap)(X_processed, y) for _ in range(self.n_iterations)
+        print(f"  Bootstrapping {self.n_iterations} iterations using {self.n_jobs} cores "
+              f"(positive=True, sign-flipped: {[self.features[i] for i in flip_idx]})...")
+        coefs = Parallel(n_jobs=self.n_jobs)(
+            delayed(_run_single_bootstrap)(Xp_train, y) for _ in range(self.n_iterations)
         )
-
-        self.bootstrap_history_ = np.array(coef_list)
+        self.bootstrap_history_ = np.array(coefs)
+        # Flip the sign back for the lower-is-better features.
+        for i in flip_idx:
+            self.bootstrap_history_[:, i] = -self.bootstrap_history_[:, i]
         self.engine.coef_ = np.mean(self.bootstrap_history_, axis=0)
 
-        x_global_top = self.pipeline.transform(global_top_ref[self.features])
-        raw_top_score = np.dot(x_global_top, self.engine.coef_)[0]
-        self.engine.intercept_ = 100 - raw_top_score
-
-        print(f"Calibration Complete. Intercept: {self.engine.intercept_:.4f}")
+        x_top = self.pipeline.transform(top_anchor[self.features])
+        raw_top = float(np.dot(x_top, self.engine.coef_)[0])
+        self.engine.intercept_ = 100.0 - raw_top
+        print(f"  Calibration intercept: {self.engine.intercept_:.4f}")
 
     def predict(self, df):
-        X_p = self.pipeline.transform(df[self.features])
-        return self.engine.predict(X_p)
+        Xp = self.pipeline.transform(df[self.features])
+        return self.engine.predict(Xp)
 
     def transform(self, df):
         return self.pipeline.transform(df[self.features])
 
-    def get_significance_report(self):
-        if self.bootstrap_history_ is None:
-            return "Model not fitted yet."
-
-        lower_ci = np.percentile(self.bootstrap_history_, 2.5, axis=0)
-        upper_ci = np.percentile(self.bootstrap_history_, 97.5, axis=0)
-        means = self.engine.coef_
-
-        report = pd.DataFrame({
-            'Feature': self.features,
-            'Mean_Weight': means,
-            'Lower_95_CI': lower_ci,
-            'Upper_95_CI': upper_ci
-        })
-        report['Is_Significant'] = ~((report['Lower_95_CI'] <= 0) & (report['Upper_95_CI'] >= 0))
-        return report.sort_values('Mean_Weight', key=lambda s: s.abs(), ascending=False)
-
-
-# ============================================================
-# GRE PARSING
-# ============================================================
-
-def parse_gre_range(s):
-    """Parse 'NNN-NNN verbal, NNN-NNN quantitative, F.F-F.F writing' -> total midpoint.
-
-    Returns NaN on missing/empty/unparsable input. Skips writing pairs (values < 10).
-    Returns (verbal_mid + quant_mid).
-    """
-    if not isinstance(s, str) or not s.strip():
-        return np.nan
-    text = s.lower()
-    # Find all numeric range pairs (ints or floats); we only keep integer pairs with both >= 10.
-    pairs = re.findall(r'(\d{2,3}(?:\.\d+)?)\s*[-–]\s*(\d{2,3}(?:\.\d+)?)', text)
-    if not pairs:
-        return np.nan
-
-    # Try to label by adjacent words
-    labeled = {}
-    for m in re.finditer(r'(\d{2,3}(?:\.\d+)?)\s*[-–]\s*(\d{2,3}(?:\.\d+)?)\s*([a-z]+)?', text):
-        lo, hi, lbl = m.group(1), m.group(2), (m.group(3) or '')
-        try:
-            lo_f, hi_f = float(lo), float(hi)
-        except ValueError:
-            continue
-        if lo_f < 10 or hi_f < 10:
-            continue  # writing
-        mid = (lo_f + hi_f) / 2.0
-        if 'verbal' in lbl:
-            labeled['verbal'] = mid
-        elif 'quant' in lbl:
-            labeled['quant'] = mid
-
-    if 'verbal' in labeled and 'quant' in labeled:
-        return labeled['verbal'] + labeled['quant']
-
-    # Fallback: first two int pairs (>=10) are verbal then quantitative
-    int_pairs = [(float(a), float(b)) for a, b in pairs if float(a) >= 10 and float(b) >= 10]
-    if len(int_pairs) >= 2:
-        v_mid = (int_pairs[0][0] + int_pairs[0][1]) / 2.0
-        q_mid = (int_pairs[1][0] + int_pairs[1][1]) / 2.0
-        return v_mid + q_mid
-    return np.nan
-
-
-# ============================================================
-# BLENDED GMAT FEATURE
-# ============================================================
-
-def compute_blended_gmat_feature(df, year_col='Year'):
-    """Compute GMAT_Combined as a 0-100 blended percentile score.
-
-    Per-year percentile ranks for GMAT_Old, GMAT_New, GRE_Total, weighted by each
-    school's submission percentages, with <25% total-submission penalty.
-    """
-    df = df.copy()
-
-    # Coerce submission %s to fractions in [0, 1]; fill missing with 0
-    for col in ('Pct_GMAT_Old', 'Pct_GMAT_New', 'Pct_GRE'):
-        if col not in df.columns:
-            df[col] = 0.0
-        # Some sources use percentages (>1); coerce robustly.
-        col_max = df[col].dropna().max() if df[col].notna().any() else 0
-        if col_max is not None and col_max > 1.5:
-            df[col] = df[col] / 100.0
-        df[col] = df[col].fillna(0.0).clip(0.0, 1.0)
-
-    # Per-year percentile ranks for each test (rank/N on non-null subset; null -> 0)
-    score_cols = {'GMAT_Old': 'rank_old', 'GMAT_New': 'rank_new', 'GRE_Total': 'rank_gre'}
-    for rcol in score_cols.values():
-        df[rcol] = 0.0
-
-    for year, sub in df.groupby(year_col):
-        for sc, rc in score_cols.items():
-            if sc not in df.columns:
-                continue
-            mask = sub[sc].notna()
-            if not mask.any():
-                continue
-            vals = sub.loc[mask, sc].values
-            ranks = rankdata(vals, method='average') / float(len(vals))
-            df.loc[sub.index[mask], rc] = ranks
-
-    # Blend
-    p_old = df['Pct_GMAT_Old'].values
-    p_new = df['Pct_GMAT_New'].values
-    p_gre = df['Pct_GRE'].values
-    r_old = df['rank_old'].values
-    r_new = df['rank_new'].values
-    r_gre = df['rank_gre'].values
-
-    total_pct = p_old + p_new + p_gre
-    weighted = p_old * r_old + p_new * r_new + p_gre * r_gre
-
-    with np.errstate(divide='ignore', invalid='ignore'):
-        blended = np.where(total_pct > 0, weighted / total_pct, np.nan)
-
-    penalty = np.where(total_pct < GMAT_BLEND_THRESHOLD, total_pct / GMAT_BLEND_THRESHOLD, 1.0)
-    blended = blended * penalty
-    blended_score = blended * 100.0
-
-    # NaN fallback: per-year median of blended_score
-    df['GMAT_Combined'] = blended_score
-    for year, sub in df.groupby(year_col):
-        med = np.nanmedian(sub['GMAT_Combined'].values)
-        if np.isnan(med):
-            med = 50.0
-        idx = sub.index[sub['GMAT_Combined'].isna()]
-        df.loc[idx, 'GMAT_Combined'] = med
-
-    df['GMAT_Combined'] = df['GMAT_Combined'].clip(0.0, 100.0)
-    return df
+    def significance_report(self):
+        lo = np.percentile(self.bootstrap_history_, 2.5, axis=0)
+        hi = np.percentile(self.bootstrap_history_, 97.5, axis=0)
+        rows = []
+        for i, f in enumerate(self.features):
+            rows.append({
+                'feature': f,
+                'mean_weight': float(self.engine.coef_[i]),
+                'lower_95_ci': float(lo[i]),
+                'upper_95_ci': float(hi[i]),
+                'is_significant': not (lo[i] <= 0 <= hi[i]),
+            })
+        return rows
 
 
 # ============================================================
 # PREPROCESSING
 # ============================================================
 
-def preprocess_raw_data(data_paths):
-    """Load 2 years, rename, parse GRE, KNN-impute per-year, blend GMAT."""
-    print(f"\n{'='*60}")
-    print("PHASE 1a: PREPROCESSING (2-YEAR)")
-    print(f"{'='*60}")
-
+def preprocess(data_paths):
+    print(f"\n{'='*60}\nPHASE 1a: PREPROCESSING (2-YEAR + 9-INDICATOR)\n{'='*60}")
     frames = []
-    for year, path in data_paths.items():
-        print(f"\n  Loading {year}: {path}")
-        d = pd.read_csv(path, low_memory=False)
-        print(f"    Raw shape: {d.shape}")
-        for col in COLUMNS_TO_DROP:
-            if col in d.columns:
-                d = d.drop(columns=[col])
+    for year, p in data_paths.items():
+        print(f"\n  Loading {year}: {p}")
+        d = pd.read_csv(p, low_memory=False)
         d = d.rename(columns=COLUMN_RENAME_MAP)
         d['Year'] = year
         frames.append(d)
-
     df = pd.concat(frames, ignore_index=True, sort=False)
     print(f"\n  Stacked shape: {df.shape}")
 
-    # Parse GRE -> numeric total
-    if 'GRE_Range_Str' in df.columns:
-        df['GRE_Total'] = df['GRE_Range_Str'].apply(parse_gre_range)
-        n_parsed = df['GRE_Total'].notna().sum()
-        print(f"  GRE parsed: {n_parsed} / {len(df)} rows have a numeric GRE_Total")
-    else:
-        df['GRE_Total'] = np.nan
-        print("  WARNING: GRE_Range_Str column missing")
+    df['SalaryByProfession'] = compute_salary_by_profession(df, year_col='Year')
+    n_sba = df['SalaryByProfession'].notna().sum()
+    print(f"  Salary-by-Profession computed for {n_sba} / {len(df)} rows "
+          f"(range: [{df['SalaryByProfession'].min():.3f}, {df['SalaryByProfession'].max():.3f}])")
 
-    # Numeric columns to KNN-impute (per year): all model features + raw test scores
-    impute_cols = list(set([
-        'EmployedAtGrad', 'Employed3Mo', 'AvgSalaryBonus',
-        'MedianGPA', 'AcceptanceRate', 'PeerScore', 'RecruiterScore',
-        'GMAT_Old', 'GMAT_New', 'GRE_Total',
-        'Pct_GMAT_Old', 'Pct_GMAT_New', 'Pct_GRE',
-        TARGET,
-    ]))
-    impute_cols = [c for c in impute_cols if c in df.columns]
+    df = compute_gmat_gre_blend(df, year_col='Year')
+    n_gmat = df['GMAT_Combined'].notna().sum()
+    print(f"  GMAT_Combined computed for {n_gmat} / {len(df)} rows "
+          f"(range: [{df['GMAT_Combined'].min():.2f}, {df['GMAT_Combined'].max():.2f}])")
 
+    impute_cols = [f for f in ALL_FEATURES + [TARGET] if f in df.columns]
+    pre_miss = df[impute_cols].isnull().sum()
     print(f"\n  Missing BEFORE imputation:")
-    for col in impute_cols:
-        miss = df[col].isnull().sum()
-        if miss:
-            print(f"    {col}: {miss} ({miss/len(df)*100:.1f}%)")
-
-    print(f"\n  KNN imputation per-year (n_neighbors=5)...")
+    for c, n in pre_miss.items():
+        if n: print(f"    {c}: {n} ({n/len(df)*100:.1f}%)")
     parts = []
     for year, sub in df.groupby('Year'):
         sub = sub.copy()
-        # Submission percentages: missing means 'didn't submit', not unknown -> fill with 0
-        for col in ('Pct_GMAT_Old', 'Pct_GMAT_New', 'Pct_GRE'):
-            if col in sub.columns:
-                sub[col] = sub[col].fillna(0.0)
-        # KNN impute the rest of impute_cols within this year
-        impute_now = [c for c in impute_cols if c in sub.columns]
-        # Need at least 5 non-NaN samples per column for KNN; rely on KNNImputer default behaviour
-        if sub[impute_now].isnull().sum().sum() > 0:
-            imputer = KNNImputer(n_neighbors=5, weights='distance')
-            sub[impute_now] = imputer.fit_transform(sub[impute_now])
+        cols = [c for c in impute_cols if c in sub.columns]
+        if sub[cols].isnull().sum().sum() > 0:
+            imp = KNNImputer(n_neighbors=5, weights='distance')
+            sub[cols] = imp.fit_transform(sub[cols])
         parts.append(sub)
     df = pd.concat(parts, ignore_index=True, sort=False)
 
-    # Compute the blended GMAT feature from imputed inputs (per-year ranks)
-    df = compute_blended_gmat_feature(df, year_col='Year')
+    # Cohort-floor fallback for GMAT_Combined and SalaryByProfession (per-year)
+    for year, sub in df.groupby('Year'):
+        floor = sub.loc[sub['GMAT_Combined'].notna(), 'GMAT_Combined'].min()
+        if pd.isna(floor): floor = 0.0
+        idx = sub.index[sub['GMAT_Combined'].isna()]
+        df.loc[idx, 'GMAT_Combined'] = floor
+        floor2 = sub.loc[sub['SalaryByProfession'].notna(), 'SalaryByProfession'].min()
+        if pd.isna(floor2): floor2 = 1.0
+        idx2 = sub.index[sub['SalaryByProfession'].isna()]
+        df.loc[idx2, 'SalaryByProfession'] = floor2
 
-    # Validate: only the model features need to be non-null
     miss_after = df[ALL_FEATURES + [TARGET]].isnull().sum().sum()
-    print(f"\n  Missing AFTER imputation+blend (model features+target): {miss_after}")
-    assert miss_after == 0, "Imputation did not fill all model-feature missing values!"
-
-    print(f"\n  Final shape: {df.shape}")
-    print(f"  GMAT_Combined range: [{df['GMAT_Combined'].min():.2f}, {df['GMAT_Combined'].max():.2f}]")
-    print(f"  GMAT_Combined mean/median: {df['GMAT_Combined'].mean():.2f} / {df['GMAT_Combined'].median():.2f}")
-
+    print(f"\n  Missing AFTER imputation: {miss_after}")
+    assert miss_after == 0
+    print(f"  Final shape: {df.shape}")
     return df
 
 
 # ============================================================
-# EXPORT ARTIFACTS
+# EXPORT
 # ============================================================
-
-def export_artifacts(ranking_system, df_imputed, output_dir, perf, sig_report):
-    """Export all model artifacts as JSON for the JS frontend."""
-    print(f"\n{'='*60}")
-    print("EXPORTING ARTIFACTS")
-    print(f"{'='*60}")
-
-    os.makedirs(output_dir, exist_ok=True)
-
-    pipeline = ranking_system.pipeline
-
-    # 1. Model config
-    config = {
-        'features': ranking_system.features,
-        'target': ranking_system.target,
-        'log_vars': LOG_VARS,
-        'logit_vars': LOGIT_VARS,
-        'inv_norm_vars': INV_NORM_VARS,
-        'outlier_cap_features': OUTLIER_CAP_FEATURES,
-    }
-    _write_json(config, output_dir, 'model_config.json')
-
-    # 2. OutlierCapper bounds
-    capper = pipeline.named_steps['outliers']
-    caps = {k: {'lower': float(v[0]), 'upper': float(v[1])} for k, v in capper.caps_.items()}
-    _write_json(caps, output_dir, 'capper_bounds.json')
-
-    # 3. RankingFeatureTransformer config
-    transformer = pipeline.named_steps['transform']
-    trans_config = {
-        'log_cols': transformer.log_cols,
-        'logit_cols': transformer.logit_cols,
-        'inv_norm_cols': transformer.inv_norm_cols,
-        'rank_counts': {k: float(v) for k, v in transformer.rank_counts_.items()},
-    }
-    _write_json(trans_config, output_dir, 'transformer_config.json')
-
-    # 4. StandardScaler params
-    scaler = pipeline.named_steps['scale']
-    scaler_params = {
-        'mean': scaler.mean_.tolist(),
-        'scale': scaler.scale_.tolist(),
-        'feature_names': ranking_system.features,
-    }
-    _write_json(scaler_params, output_dir, 'scaler_params.json')
-
-    # 5. Model weights
-    model_weights = {
-        'coef': ranking_system.engine.coef_.tolist(),
-        'intercept': float(ranking_system.engine.intercept_),
-    }
-    _write_json(model_weights, output_dir, 'model_weights.json')
-
-    # 6. Data snapshot - use most recent year only for the simulation cohort
-    snapshot_year = INFERENCE_CURVE_YEAR
-    snap = df_imputed[df_imputed['Year'] == snapshot_year].copy()
-    if snap.empty:
-        snap = df_imputed.copy()
-    snapshot_cols = ['School', 'Rank', TARGET] + ranking_system.features
-    snapshot = snap[snapshot_cols].to_dict(orient='records')
-    _write_json(snapshot, output_dir, 'data_snapshot.json')
-
-    # 7. Feature ranges + GMAT input config + GWU current values
-    feature_ranges = {}
-    for feat in ranking_system.features:
-        vals = snap[feat]
-        feature_ranges[feat] = {
-            'data_min': float(vals.min()),
-            'data_max': float(vals.max()),
-            'data_mean': float(vals.mean()),
-            'data_median': float(vals.median()),
-            **SLIDER_RANGES.get(feat, {}),
-        }
-
-    feature_ranges['_gmat_input_config'] = GMAT_INPUT_CONFIG
-
-    gwu_row = snap[snap['School'].str.contains('George Washington', case=False, na=False)]
-    if not gwu_row.empty:
-        gwu_values = {feat: float(gwu_row.iloc[0][feat]) for feat in ranking_system.features}
-        # Add raw test inputs (or null) so the slider can default to a real value
-        gwu_extras = {}
-        for raw_col, key in (('GMAT_Old', 'gmat_old'), ('GMAT_New', 'gmat_new'),
-                             ('GRE_Total', 'gre_total'),
-                             ('Pct_GMAT_Old', 'pct_gmat_old'),
-                             ('Pct_GMAT_New', 'pct_gmat_new'),
-                             ('Pct_GRE', 'pct_gre')):
-            if raw_col in gwu_row.columns:
-                v = gwu_row.iloc[0][raw_col]
-                gwu_extras[key] = None if pd.isna(v) else float(v)
-            else:
-                gwu_extras[key] = None
-        gwu_values.update(gwu_extras)
-        feature_ranges['_gwu_current'] = gwu_values
-        feature_ranges['_gwu_school_name'] = str(gwu_row.iloc[0]['School'])
-        feature_ranges['_gwu_current_rank'] = int(gwu_row.iloc[0]['Rank'])
-        feature_ranges['_gwu_current_score'] = float(gwu_row.iloc[0][TARGET])
-    else:
-        print("  WARNING: George Washington University not found in dataset!")
-
-    _write_json(feature_ranges, output_dir, 'feature_ranges.json')
-
-    # 8. GMAT inference curves (per-year sorted scores from snapshot year)
-    curves_year = INFERENCE_CURVE_YEAR
-    src = df_imputed[df_imputed['Year'] == curves_year]
-    if src.empty:
-        src = df_imputed
-    def _sorted_nonnull(col):
-        if col not in src.columns:
-            return []
-        v = src[col].dropna().values
-        return sorted(float(x) for x in v)
-    curves = {
-        'year': curves_year,
-        'gmat_old': _sorted_nonnull('GMAT_Old'),
-        'gmat_new': _sorted_nonnull('GMAT_New'),
-        'gre_total': _sorted_nonnull('GRE_Total'),
-    }
-    _write_json(curves, output_dir, 'gmat_inference_curves.json')
-
-    # 9. Model performance + explainability
-    # Per-row signed contributions: scaled[i] * coef[i]
-    X_scaled = ranking_system.transform(df_imputed)  # numpy 2D
-    coef = np.asarray(ranking_system.engine.coef_)
-    contrib = X_scaled * coef[np.newaxis, :]  # shape (n_rows, n_feats)
-    avg_abs = np.mean(np.abs(contrib), axis=0)
-    avg_abs_pct = (avg_abs / avg_abs.sum() * 100.0).tolist() if avg_abs.sum() > 0 else [0.0] * len(coef)
-
-    gwu_pct = []
-    gwu_idx_local = None
-    gwu_in_imputed = df_imputed[(df_imputed['School'].str.contains('George Washington', case=False, na=False)) &
-                                (df_imputed['Year'] == INFERENCE_CURVE_YEAR)]
-    if not gwu_in_imputed.empty:
-        gwu_idx_local = gwu_in_imputed.index[0]
-        # Locate in the X_scaled order (df_imputed index is preserved)
-        idx_pos = list(df_imputed.index).index(gwu_idx_local)
-        signed = contrib[idx_pos]
-        denom = np.sum(np.abs(signed))
-        if denom > 0:
-            gwu_pct = (signed / denom * 100.0).tolist()
-        else:
-            gwu_pct = [0.0] * len(coef)
-
-    coef_rows = []
-    for _, row in sig_report.iterrows():
-        coef_rows.append({
-            'feature': str(row['Feature']),
-            'mean_weight': float(row['Mean_Weight']),
-            'lower_95_ci': float(row['Lower_95_CI']),
-            'upper_95_ci': float(row['Upper_95_CI']),
-            'is_significant': bool(row['Is_Significant']),
-        })
-
-    explainability = {
-        'performance': {
-            'mae': float(perf['mae']),
-            'rmse': float(perf['rmse']),
-            'r2': float(perf['r2']),
-            'spearman': float(perf['spearman']),
-            'n_observations': int(len(df_imputed)),
-            'n_bootstrap_iterations': int(N_BOOTSTRAP_ITERATIONS),
-            'training_years': sorted(df_imputed['Year'].unique().tolist()),
-        },
-        'intercept': float(ranking_system.engine.intercept_),
-        'coefficients': coef_rows,
-        'avg_abs_contribution_pct': [
-            {'feature': f, 'pct': float(p)}
-            for f, p in zip(ranking_system.features, avg_abs_pct)
-        ],
-        'gwu_contribution_pct': [
-            {'feature': f, 'signed_pct': float(p)}
-            for f, p in zip(ranking_system.features, gwu_pct)
-        ] if gwu_pct else [],
-        'methodology': {
-            'gmat_blend': (
-                "GMAT_Combined is computed per-school as a 0-100 blended percentile score: "
-                "(1) per-year percentile rank for each of GMAT_old, GMAT_new, GRE_total; "
-                "(2) weighted average using each school's submission percentages; "
-                "(3) penalty multiplier of min(1, total_submission/0.25) when total submission < 25%; "
-                "(4) z-score standardization in the model pipeline."
-            ),
-            'training': f"Bootstrapped ElasticNetCV over {N_BOOTSTRAP_ITERATIONS} resamples on {len(df_imputed)} observations from {sorted(df_imputed['Year'].unique().tolist())}.",
-        },
-    }
-    _write_json(explainability, output_dir, 'model_explainability.json')
-
-    print(f"\n  All artifacts exported to: {output_dir}")
-
 
 def _write_json(data, output_dir, filename):
     path = os.path.join(output_dir, filename)
@@ -639,70 +501,221 @@ def _write_json(data, output_dir, filename):
     print(f"  [OK] {filename}")
 
 
+def export_artifacts(df, regression, perf, output_dir):
+    print(f"\n{'='*60}\nEXPORTING ARTIFACTS\n{'='*60}")
+    os.makedirs(output_dir, exist_ok=True)
+
+    snap_year = INFERENCE_CURVE_YEAR
+    snap_df = df[df['Year'] == snap_year].copy()
+
+    # 1. Model config
+    _write_json({
+        'features': ALL_FEATURES,
+        'target': TARGET,
+        'log_vars': LOG_VARS,
+        'logit_vars': LOGIT_VARS,
+        'outlier_exclude': sorted(OUTLIER_EXCLUDE),
+    }, output_dir, 'model_config.json')
+
+    # 2. OutlierCapper bounds
+    cap = regression.pipeline.named_steps['outliers']
+    _write_json({k: {'lower': float(v[0]), 'upper': float(v[1])} for k, v in cap.caps_.items()},
+                output_dir, 'capper_bounds.json')
+
+    # 3. Transformer config
+    trans = regression.pipeline.named_steps['transform']
+    _write_json({'log_cols': trans.log_cols, 'logit_cols': trans.logit_cols},
+                output_dir, 'transformer_config.json')
+
+    # 4. Scaler params
+    scaler = regression.pipeline.named_steps['scale']
+    _write_json({'mean': scaler.mean_.tolist(), 'scale': scaler.scale_.tolist(), 'feature_names': ALL_FEATURES},
+                output_dir, 'scaler_params.json')
+
+    # 5. Model weights
+    _write_json({'coef': regression.engine.coef_.tolist(), 'intercept': float(regression.engine.intercept_)},
+                output_dir, 'model_weights.json')
+
+    # 6. Data snapshot (most recent year, with imputed indicators)
+    snapshot_cols = ['School', 'Rank', TARGET] + ALL_FEATURES
+    _write_json(snap_df[snapshot_cols].to_dict(orient='records'),
+                output_dir, 'data_snapshot.json')
+
+    # 7. GMAT/GRE inference curves (per-exam sorted scores from snapshot year)
+    src = df[df['Year'] == snap_year]
+    def _sorted(col):
+        if col not in src.columns: return []
+        return sorted(float(x) for x in src[col].dropna().values)
+    _write_json({
+        'year': int(snap_year),
+        'gmat_old': _sorted('GMAT_Old'),
+        'gmat_new': _sorted('GMAT_New'),
+        'gre_q':    _sorted('GRE_Q'),
+        'gre_v':    _sorted('GRE_V'),
+        'gre_aw':   _sorted('GRE_AW'),
+    }, output_dir, 'gmat_inference_curves.json')
+
+    # 8. Feature ranges + GWU current values + SBP cohort + GMAT input config
+    feature_ranges = {}
+    for f in ALL_FEATURES:
+        v = snap_df[f]
+        feature_ranges[f] = {
+            'data_min': float(v.min()), 'data_max': float(v.max()),
+            'data_mean': float(v.mean()), 'data_median': float(v.median()),
+            **SLIDER_RANGES.get(f, {}),
+        }
+    feature_ranges['_gmat_input_config'] = GMAT_INPUT_CONFIG
+
+    sbp_cohort = {}
+    for occ in SBP_OCCUPATIONS:
+        rows = []
+        for i in range(8):
+            occ_col = f'base_salary_by_occupation[{i}].occupation'
+            sal_col = f'base_salary_by_occupation[{i}].average_salary'
+            n_col   = f'base_salary_by_occupation[{i}].number_reporting_jobs'
+            if occ_col not in df.columns: continue
+            sub = df[(df['Year'] == snap_year) & (df[occ_col] == occ)]
+            for _, r in sub.iterrows():
+                sal = r.get(sal_col); n = r.get(n_col)
+                if pd.isna(sal) or pd.isna(n) or n < MIN_OCCUPATION_REPORTERS: continue
+                rows.append((float(sal), float(n)))
+        if rows:
+            ntot = sum(r[1] for r in rows)
+            sbp_cohort[occ] = {
+                'cohort_mean': float(sum(r[0]*r[1] for r in rows) / ntot),
+                'cohort_n_total': int(ntot),
+            }
+    feature_ranges['_sbp_cohort'] = sbp_cohort
+    feature_ranges['_sbp_occupations'] = SBP_OCCUPATIONS
+    feature_ranges['_sbp_slider'] = SBP_SLIDER
+
+    gwu = snap_df[snap_df['School'].str.contains('George Washington', case=False, na=False)]
+    if not gwu.empty:
+        gwu_full = df[(df['School'].str.contains('George Washington', case=False, na=False))
+                      & (df['Year'] == snap_year)].iloc[0]
+        gwu_vals = {f: float(gwu.iloc[0][f]) for f in ALL_FEATURES}
+        for raw_col, key in (('GMAT_Old', 'gmat_old'), ('GMAT_New', 'gmat_new'),
+                             ('GRE_Q', 'gre_q'), ('GRE_V', 'gre_v'), ('GRE_AW', 'gre_aw'),
+                             ('Pct_GMAT_Old', 'pct_gmat_old'), ('Pct_GMAT_New', 'pct_gmat_new'),
+                             ('Pct_GRE', 'pct_gre'),
+                             ('student_body_fulltime_mba.enrollment', 'fulltime_enrollment')):
+            v = gwu_full.get(raw_col, np.nan)
+            gwu_vals[key] = None if pd.isna(v) else float(v)
+        gwu_sbp = {}
+        for i in range(8):
+            occ_col = f'base_salary_by_occupation[{i}].occupation'
+            sal_col = f'base_salary_by_occupation[{i}].average_salary'
+            n_col   = f'base_salary_by_occupation[{i}].number_reporting_jobs'
+            occ = gwu_full.get(occ_col)
+            if not isinstance(occ, str) or occ.strip() not in SBP_OCCUPATIONS: continue
+            sal = gwu_full.get(sal_col); n = gwu_full.get(n_col)
+            gwu_sbp[occ.strip()] = {
+                'salary': None if pd.isna(sal) else float(sal),
+                'n_reporting': None if pd.isna(n) else float(n),
+            }
+        gwu_vals['sbp_per_occupation'] = gwu_sbp
+        feature_ranges['_gwu_current'] = gwu_vals
+        feature_ranges['_gwu_school_name'] = str(gwu.iloc[0]['School'])
+        feature_ranges['_gwu_current_rank'] = int(gwu.iloc[0]['Rank'])
+        feature_ranges['_gwu_current_score'] = float(gwu.iloc[0][TARGET])
+    _write_json(feature_ranges, output_dir, 'feature_ranges.json')
+
+    # 9. Explainability (regression performance + coefficients + contributions)
+    coef_rows = regression.significance_report()
+    Xs = regression.transform(df)
+    coef = np.asarray(regression.engine.coef_)
+    contribs = Xs * coef[np.newaxis, :]
+    avg_abs = np.mean(np.abs(contribs), axis=0)
+    avg_abs_pct = (avg_abs / avg_abs.sum() * 100.0).tolist() if avg_abs.sum() > 0 else [0.0] * len(coef)
+
+    gwu_pct = []
+    gwu_in = df[(df['School'].str.contains('George Washington', case=False, na=False))
+                & (df['Year'] == snap_year)]
+    if not gwu_in.empty:
+        idx_pos = list(df.index).index(gwu_in.index[0])
+        signed = contribs[idx_pos]
+        denom = np.sum(np.abs(signed))
+        if denom > 0:
+            gwu_pct = (signed / denom * 100.0).tolist()
+
+    explainability = {
+        'regression': {
+            'coefficients': coef_rows,
+            'intercept': float(regression.engine.intercept_),
+            'avg_abs_contribution_pct': [
+                {'feature': f, 'pct': float(p)} for f, p in zip(ALL_FEATURES, avg_abs_pct)
+            ],
+            'gwu_contribution_pct': [
+                {'feature': f, 'signed_pct': float(p)} for f, p in zip(ALL_FEATURES, gwu_pct)
+            ] if gwu_pct else [],
+            'performance': perf,
+        },
+        'methodology': {
+            'regression': (
+                f"Bootstrapped ElasticNetCV ({N_BOOTSTRAP_ITERATIONS} iterations) over the 9 "
+                "features on stacked 2024+2025 data (~243 observations). Includes log/logit "
+                "transforms and outlier capping (excluding GMAT_Combined and SalaryByProfession, "
+                "which are already on bounded scales). Calibrated so the rank-1 school = 100."
+            ),
+            'gmat_blend': (
+                "Per-year percentile rank for GMAT_old, GMAT_new, GRE_Q, GRE_V, GRE_AW. "
+                "GRE-internal: 0.4*Q + 0.4*V + 0.2*AW. Cross-exam blend weighted by "
+                "submission proportions (renormalised). Median GRE Q/V/AW approximated "
+                "from 10th-90th range midpoints. No-input fallback: per-year cohort floor."
+            ),
+        },
+    }
+    _write_json(explainability, output_dir, 'model_explainability.json')
+
+    print(f"\n  All artifacts exported to: {output_dir}")
+
+
 # ============================================================
 # MAIN
 # ============================================================
 
 def main():
     print("=" * 60)
-    print("GWU RANKING PREDICTOR - MODEL TRAINING (2-YEAR + BLENDED GMAT/GRE)")
+    print("GWSB RANKING PREDICTOR - REGRESSION TRAINING")
     print("=" * 60)
 
-    df_imputed = preprocess_raw_data(DATA_PATHS)
+    df = preprocess(DATA_PATHS)
 
-    print(f"\n{'='*60}")
-    print("PHASE 1b: MODEL TRAINING")
-    print(f"{'='*60}")
+    print(f"\n{'='*60}\nTRAINING REGRESSION (BOOTSTRAPPED ELASTICNET, 9 FEATURES)\n{'='*60}")
+    cur_year = max(df['Year'].unique())
+    top_anchor = df[(df['Year'] == cur_year) & (df['Rank'] == 1)].head(1)
+    if top_anchor.empty:
+        top_anchor = df[df['Rank'] == 1].head(1)
+    print(f"  Calibration anchor: {top_anchor.iloc[0]['School']} "
+          f"(Year {int(top_anchor.iloc[0]['Year'])}, Rank {int(top_anchor.iloc[0]['Rank'])})")
 
-    # Calibrate on the rank-1 school in the most recent year
-    cur_year = max(df_imputed['Year'].unique())
-    cur_top = df_imputed[(df_imputed['Year'] == cur_year) & (df_imputed['Rank'] == 1)]
-    if cur_top.empty:
-        # fallback: any year's rank-1
-        cur_top = df_imputed[df_imputed['Rank'] == 1].head(1)
-    global_top_school = cur_top.head(1)
-    print(f"\n  Calibration anchor: {global_top_school.iloc[0]['School']} "
-          f"(Year {int(global_top_school.iloc[0]['Year'])}, Rank {int(global_top_school.iloc[0]['Rank'])})")
+    reg = RegressionRanker(features=ALL_FEATURES)
+    reg.fit_and_calibrate(df, target=TARGET, top_anchor=top_anchor)
 
-    ranking_system = USNewsRankingSystem(
-        features=ALL_FEATURES,
-        target=TARGET,
-        log_vars=LOG_VARS,
-        logit_vars=LOGIT_VARS,
-        inv_norm_vars=INV_NORM_VARS,
-        outlier_features=OUTLIER_CAP_FEATURES,
-        n_iterations=N_BOOTSTRAP_ITERATIONS,
-        n_jobs=N_JOBS,
-    )
+    preds = reg.predict(df)
+    actuals = df[TARGET].values
+    perf = {
+        'mae': float(mean_absolute_error(actuals, preds)),
+        'rmse': float(np.sqrt(mean_squared_error(actuals, preds))),
+        'r2': float(r2_score(actuals, preds)),
+        'spearman': float(spearmanr(actuals, preds)[0]),
+        'n_observations': int(len(df)),
+        'n_bootstrap_iterations': int(N_BOOTSTRAP_ITERATIONS),
+        'training_years': sorted(int(y) for y in df['Year'].unique()),
+    }
+    print(f"\n  vs published OverallScore:")
+    print(f"    MAE:      {perf['mae']:.4f}")
+    print(f"    RMSE:     {perf['rmse']:.4f}")
+    print(f"    R^2:      {perf['r2']:.4f}")
+    print(f"    Spearman: {perf['spearman']:.4f}")
+    print(f"\n  Coefficients:")
+    for r in reg.significance_report():
+        print(f"    {r['feature']:24s} mean={r['mean_weight']:7.3f}  "
+              f"CI=[{r['lower_95_ci']:7.3f}, {r['upper_95_ci']:7.3f}]  "
+              f"{'sig' if r['is_significant'] else 'n.s.'}")
 
-    ranking_system.fit_and_calibrate(df_imputed, global_top_ref=global_top_school)
-
-    print(f"\n{'='*60}")
-    print("MODEL PERFORMANCE")
-    print(f"{'='*60}")
-
-    preds = ranking_system.predict(df_imputed)
-    actuals = df_imputed[TARGET].values
-    mae = mean_absolute_error(actuals, preds)
-    rmse = np.sqrt(mean_squared_error(actuals, preds))
-    r2 = r2_score(actuals, preds)
-    spearman, _ = spearmanr(actuals, preds)
-    perf = {'mae': mae, 'rmse': rmse, 'r2': r2, 'spearman': spearman}
-
-    print(f"  MAE:      {mae:.4f}")
-    print(f"  RMSE:     {rmse:.4f}")
-    print(f"  R^2:      {r2:.4f}")
-    print(f"  Spearman: {spearman:.4f}")
-
-    sig_report = ranking_system.get_significance_report()
-    print(f"\n  Coefficient Significance:")
-    print(sig_report.to_string(index=False))
-
-    export_artifacts(ranking_system, df_imputed, OUTPUT_DIR, perf, sig_report)
-
-    print(f"\n{'='*60}")
-    print("TRAINING COMPLETE")
-    print(f"{'='*60}")
+    export_artifacts(df, reg, perf, OUTPUT_DIR)
+    print(f"\n{'='*60}\nTRAINING COMPLETE\n{'='*60}")
 
 
 if __name__ == '__main__':

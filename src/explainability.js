@@ -1,11 +1,11 @@
 /**
- * Tab 2 — Model Performance & Explainability.
+ * Tab 4 — Indirect Model Insights.
  * Renders one card per core-feature model with metrics, confidence pill,
- * and a horizontal bar of top signed coefficients.
+ * signed-coefficient bar chart, and inline feature-contribution % bars.
  */
 
 import Chart from 'chart.js/auto';
-import { getCoreTargetSummaries } from './cfm-models.js';
+import { getCoreTargetSummaries, getCfmTopFeatures } from './cfm-models.js';
 
 const FEATURE_LABEL_OVERRIDES = {
   // Make the longer raw column names a bit kinder to the eye.
@@ -56,9 +56,9 @@ const FEATURE_LABEL_OVERRIDES = {
 };
 
 const CONFIDENCE_COPY = {
-  high: 'Out-of-sample R² is strong. Coefficients are reliable directional signals.',
-  medium: 'Holds up directionally but has meaningful residual error. Read trends, not exact values.',
-  low: 'Out-of-sample R² is near zero. Predictions add little over the school median — do not over-interpret.',
+  high: 'Strong fit on unseen schools. Both the direction and the rough size of changes are trustworthy — actionable for planning.',
+  medium: 'Decent fit. The direction is reliable, but treat exact magnitudes as approximations rather than precise estimates.',
+  low: 'Weak fit. Treat as suggestive only — small lever changes here are unlikely to translate into measurable rank movement.',
 };
 
 function fmtNum(value, digits = 3) {
@@ -80,6 +80,7 @@ function featureLabel(rawKey) {
   return FEATURE_LABEL_OVERRIDES[rawKey] || rawKey;
 }
 
+/** Horizontal bar chart showing signed coefficients (original view). */
 function buildChart(canvas, topCoefficients) {
   const sorted = topCoefficients.slice(0, 8);
   const labels = sorted.map((c) => featureLabel(c.feature));
@@ -138,6 +139,42 @@ function buildChart(canvas, topCoefficients) {
   });
 }
 
+/**
+ * Build inline CSS-only contribution bars for the top features driving a target.
+ * Each row shows: feature name, a proportional gradient bar, direction arrow, and
+ * the % contribution label. Top 6 features are shown to keep cards compact.
+ */
+function buildContribBars(targetName) {
+  const features = getCfmTopFeatures(targetName, 6);
+  if (!features.length) return '<p class="text-gray-600 text-xs">No feature data available.</p>';
+
+  const maxPct = features[0]?.pct || 1; // first item has highest pct (already sorted)
+
+  const rows = features.map(f => {
+    const label = featureLabel(f.feature);
+    const isPositive = f.coefficient >= 0;
+    const barClass = isPositive ? 'contrib-bar--pos' : 'contrib-bar--neg';
+    const arrow = isPositive ? '↑' : '↓';
+    const arrowClass = isPositive ? 'text-indigo-300' : 'text-pink-300';
+    // Scale bar width relative to the top contributor so the largest = 100%
+    const barWidth = Math.max(2, (f.pct / maxPct) * 100);
+
+    return `
+      <div class="contrib-row">
+        <span class="contrib-label" title="${f.feature}">${label}</span>
+        <div class="contrib-bar-track">
+          <div class="contrib-bar ${barClass}" style="width: ${barWidth.toFixed(1)}%"></div>
+        </div>
+        <span class="contrib-pct">
+          <span class="${arrowClass}">${arrow}</span> ${f.pct.toFixed(1)}%
+        </span>
+      </div>
+    `;
+  }).join('');
+
+  return `<div class="contrib-bars">${rows}</div>`;
+}
+
 function renderCard(target) {
   const conf = target.confidence || { label: 'Low', tone: 'low' };
   const card = document.createElement('div');
@@ -152,26 +189,34 @@ function renderCard(target) {
     </div>
 
     <div class="grid grid-cols-4 gap-2 mb-3 text-center">
-      <div class="metric-mini">
-        <p class="metric-mini-label">CV R²</p>
+      <div class="metric-mini" title="Cross-validated R² — fit on schools the model hasn't seen. 1.00 = perfect, 0.00 = no better than guessing the average.">
+        <p class="metric-mini-label">Cross-val fit</p>
         <p class="metric-mini-value">${fmtNum(target.grouped_cv?.r2, 2)}</p>
       </div>
-      <div class="metric-mini">
-        <p class="metric-mini-label">Holdout R²</p>
+      <div class="metric-mini" title="Forward-in-time test — train on 2024 data, predict 2025. Tests how well the model holds up year-over-year.">
+        <p class="metric-mini-label">Next-year fit</p>
         <p class="metric-mini-value">${fmtNum(target.temporal_holdout?.r2, 2)}</p>
       </div>
-      <div class="metric-mini">
-        <p class="metric-mini-label">MAE</p>
+      <div class="metric-mini" title="Average prediction error in this indicator's own units. Lower = better.">
+        <p class="metric-mini-label">Avg error</p>
         <p class="metric-mini-value">${fmtMae(target.target_name, target.grouped_cv?.mae)}</p>
       </div>
-      <div class="metric-mini">
-        <p class="metric-mini-label">Rows</p>
+      <div class="metric-mini" title="Number of school-year observations used to train the model.">
+        <p class="metric-mini-label">Trained on</p>
         <p class="metric-mini-value">${target.training_row_count}</p>
       </div>
     </div>
 
-    <p class="text-[11px] text-gray-500 mb-2">Top signed levers (positive = pushes target up)</p>
+    <p class="text-[11px] text-gray-500 mb-2">Strongest levers — green pushes the indicator up, pink pushes it down</p>
     <div class="perf-chart-wrap"><canvas></canvas></div>
+
+    <div class="contrib-section mt-4">
+      <p class="text-[11px] text-gray-500 mb-2">
+        Where the model's signal comes from
+        <span class="text-gray-600 ml-1">(% share of total influence · ↑ helps · ↓ hurts)</span>
+      </p>
+      ${buildContribBars(target.target_name)}
+    </div>
 
     <p class="confidence-copy mt-3">${CONFIDENCE_COPY[conf.tone] || ''}</p>
   `;
@@ -180,11 +225,25 @@ function renderCard(target) {
   return card;
 }
 
+/* Confidence priority for sorting: high first, then medium, then low */
+const CONFIDENCE_ORDER = { high: 0, medium: 1, low: 2 };
+
 export function renderExplainability() {
   const grid = document.getElementById('performance-grid');
   if (!grid) return;
   grid.innerHTML = '';
-  for (const target of getCoreTargetSummaries()) {
-    grid.appendChild(renderCard(target));
+
+  // Sort cards by confidence level: high → medium → low
+  const targets = getCoreTargetSummaries().slice();
+  targets.sort((a, b) => {
+    const aTone = (a.confidence?.tone || 'low');
+    const bTone = (b.confidence?.tone || 'low');
+    return (CONFIDENCE_ORDER[aTone] ?? 2) - (CONFIDENCE_ORDER[bTone] ?? 2);
+  });
+
+  for (const target of targets) {
+    const card = renderCard(target);
+    grid.appendChild(card);
   }
 }
+

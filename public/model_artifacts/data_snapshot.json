@@ -6,11 +6,12 @@
     "EmployedAtGrad": 0.486,
     "Employed3Mo": 0.829,
     "AvgSalaryBonus": 127339.0,
+    "SalaryByProfession": 1.0450242018011704,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.16,
     "PeerScore": 2.9,
     "RecruiterScore": 3.1,
-    "GMAT_Combined": 44.032786885245905
+    "GMAT_Combined": 36.33233644780546
   },
   {
     "School": "Arizona State University",
@@ -19,11 +20,12 @@
     "EmployedAtGrad": 0.593,
     "Employed3Mo": 0.857,
     "AvgSalaryBonus": 133727.0,
+    "SalaryByProfession": 0.9148312734349857,
     "MedianGPA": 3.8,
     "AcceptanceRate": 0.184,
     "PeerScore": 3.6,
     "RecruiterScore": 3.1,
-    "GMAT_Combined": 44.09153005464481
+    "GMAT_Combined": 34.95609413417632
   },
   {
     "School": "Auburn University",
@@ -32,11 +34,12 @@
     "EmployedAtGrad": 0.52,
     "Employed3Mo": 0.787,
     "AvgSalaryBonus": 86823.0,
+    "SalaryByProfession": 0.4975593729778325,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.187,
     "PeerScore": 3.2,
     "RecruiterScore": 3.0,
-    "GMAT_Combined": 42.41803278688524
+    "GMAT_Combined": 21.169252408550353
   },
   {
     "School": "Babson College",
@@ -45,11 +48,12 @@
     "EmployedAtGrad": 0.426,
     "Employed3Mo": 0.646,
     "AvgSalaryBonus": 103841.0,
+    "SalaryByProfession": 0.739234145804669,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.616,
     "PeerScore": 3.3,
     "RecruiterScore": 2.9,
-    "GMAT_Combined": 37.04918032786886
+    "GMAT_Combined": 70.51633298208641
   },
   {
     "School": "Baylor University",
@@ -58,11 +62,12 @@
     "EmployedAtGrad": 0.75,
     "Employed3Mo": 0.886,
     "AvgSalaryBonus": 90461.0,
+    "SalaryByProfession": 0.5620852164423146,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.255,
     "PeerScore": 3.1,
     "RecruiterScore": 2.8,
-    "GMAT_Combined": 20.54098360655738
+    "GMAT_Combined": 52.65191429574991
   },
   {
     "School": "Bentley University",
@@ -71,11 +76,12 @@
     "EmployedAtGrad": 0.507,
     "Employed3Mo": 0.945,
     "AvgSalaryBonus": 84015.0,
+    "SalaryByProfession": 0.4966550560211939,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.495,
     "PeerScore": 2.9,
     "RecruiterScore": 2.7,
-    "GMAT_Combined": 4.19672131147541
+    "GMAT_Combined": 29.15529700824118
   },
   {
     "School": "Binghamton University--SUNY",
@@ -84,11 +90,12 @@
     "EmployedAtGrad": 0.592,
     "Employed3Mo": 0.922,
     "AvgSalaryBonus": 77618.0,
+    "SalaryByProfession": 0.5450411692865278,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.649,
     "PeerScore": 2.7,
     "RecruiterScore": 3.0,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 26.747953211261077
   },
   {
     "School": "Boston College",
@@ -97,11 +104,12 @@
     "EmployedAtGrad": 0.659,
     "Employed3Mo": 0.806,
     "AvgSalaryBonus": 131400.0,
+    "SalaryByProfession": 0.7676012854232787,
     "MedianGPA": 3.1,
     "AcceptanceRate": 0.548,
     "PeerScore": 3.4,
     "RecruiterScore": 3.2,
-    "GMAT_Combined": 66.27136379490757
+    "GMAT_Combined": 44.50391962117693
   },
   {
     "School": "Boston University",
@@ -110,11 +118,12 @@
     "EmployedAtGrad": 0.421,
     "Employed3Mo": 0.832,
     "AvgSalaryBonus": 125644.0,
+    "SalaryByProfession": 0.8069805605795776,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.372,
     "PeerScore": 3.4,
     "RecruiterScore": 3.1,
-    "GMAT_Combined": 69.63596914175506
+    "GMAT_Combined": 53.6565157872949
   },
   {
     "School": "Brandeis University",
@@ -123,11 +132,12 @@
     "EmployedAtGrad": 0.393,
     "Employed3Mo": 0.607,
     "AvgSalaryBonus": 89119.0,
+    "SalaryByProfession": 0.6204181676943817,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.638,
     "PeerScore": 2.8,
     "RecruiterScore": 2.8,
-    "GMAT_Combined": 5.21311475409836
+    "GMAT_Combined": 21.326667568268128
   },
   {
     "School": "Brigham Young University",
@@ -136,11 +146,12 @@
     "EmployedAtGrad": 0.648,
     "Employed3Mo": 0.858,
     "AvgSalaryBonus": 136878.0,
+    "SalaryByProfession": 0.9008087693201821,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.439,
     "PeerScore": 3.1,
     "RecruiterScore": 3.0,
-    "GMAT_Combined": 55.33697632058288
+    "GMAT_Combined": 46.42857142857142
   },
   {
     "School": "Canisius University",
@@ -149,11 +160,12 @@
     "EmployedAtGrad": 0.889,
     "Employed3Mo": 0.926,
     "AvgSalaryBonus": 61204.0,
+    "SalaryByProfession": 0.46942732598892156,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.494,
     "PeerScore": 2.2,
     "RecruiterScore": 3.3,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 16.19465303570712
   },
   {
     "School": "Carnegie Mellon University",
@@ -162,11 +174,12 @@
     "EmployedAtGrad": 0.605,
     "Employed3Mo": 0.797,
     "AvgSalaryBonus": 184392.0,
+    "SalaryByProfession": 1.0465879514873933,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.243,
     "PeerScore": 4.1,
     "RecruiterScore": 3.9,
-    "GMAT_Combined": 82.9359165424739
+    "GMAT_Combined": 69.5996891907448
   },
   {
     "School": "Chapman University",
@@ -175,11 +188,12 @@
     "EmployedAtGrad": 0.586,
     "Employed3Mo": 0.966,
     "AvgSalaryBonus": 84580.0,
+    "SalaryByProfession": 0.5018840725622387,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.494,
     "PeerScore": 2.6,
     "RecruiterScore": 4.0,
-    "GMAT_Combined": 38.62183939983329
+    "GMAT_Combined": 21.734385883445555
   },
   {
     "School": "Claremont Graduate University",
@@ -188,11 +202,12 @@
     "EmployedAtGrad": 0.606,
     "Employed3Mo": 0.727,
     "AvgSalaryBonus": 75864.0,
+    "SalaryByProfession": 0.5402777326593062,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.938,
     "PeerScore": 3.0,
     "RecruiterScore": 3.2,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 22.418391974579706
   },
   {
     "School": "Clark Atlanta University",
@@ -201,11 +216,12 @@
     "EmployedAtGrad": 0.841,
     "Employed3Mo": 0.886,
     "AvgSalaryBonus": 95091.0,
+    "SalaryByProfession": 0.6633454725240686,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.592,
     "PeerScore": 2.1,
     "RecruiterScore": 2.2,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 73.24404967384228
   },
   {
     "School": "Clark University",
@@ -214,11 +230,12 @@
     "EmployedAtGrad": 0.662,
     "Employed3Mo": 0.941,
     "AvgSalaryBonus": 72152.0,
+    "SalaryByProfession": 0.5025301342567647,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.594,
     "PeerScore": 2.2,
     "RecruiterScore": 1.8,
-    "GMAT_Combined": 7.147540983606558
+    "GMAT_Combined": 46.17843343870741
   },
   {
     "School": "Clarkson University",
@@ -227,11 +244,12 @@
     "EmployedAtGrad": 0.52,
     "Employed3Mo": 0.64,
     "AvgSalaryBonus": 92117.0,
+    "SalaryByProfession": 0.6780984439950272,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.79,
     "PeerScore": 2.1,
     "RecruiterScore": 2.3,
-    "GMAT_Combined": 0.13114754098360656
+    "GMAT_Combined": 3.881278538812785
   },
   {
     "School": "Clemson University",
@@ -240,11 +258,12 @@
     "EmployedAtGrad": 0.465,
     "Employed3Mo": 0.93,
     "AvgSalaryBonus": 72102.0,
+    "SalaryByProfession": 0.48603654403404417,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.395,
     "PeerScore": 3.0,
     "RecruiterScore": 3.0,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 44.66544357837441
   },
   {
     "School": "College of Charleston",
@@ -253,11 +272,12 @@
     "EmployedAtGrad": 0.722,
     "Employed3Mo": 0.949,
     "AvgSalaryBonus": 76530.0,
+    "SalaryByProfession": 0.5194926862976526,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.336,
     "PeerScore": 2.4,
     "RecruiterScore": 2.5,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 17.36998535071644
   },
   {
     "School": "William & Mary",
@@ -266,11 +286,12 @@
     "EmployedAtGrad": 0.483,
     "Employed3Mo": 0.717,
     "AvgSalaryBonus": 114889.0,
+    "SalaryByProfession": 0.7393630307283688,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.38,
     "PeerScore": 3.2,
     "RecruiterScore": 3.6,
-    "GMAT_Combined": 5.163934426229509
+    "GMAT_Combined": 22.3709167544784
   },
   {
     "School": "Columbia University",
@@ -279,11 +300,12 @@
     "EmployedAtGrad": 0.669,
     "Employed3Mo": 0.884,
     "AvgSalaryBonus": 195404.0,
+    "SalaryByProfession": 1.0924830481127656,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.257,
     "PeerScore": 4.4,
     "RecruiterScore": 4.1,
-    "GMAT_Combined": 97.23240115718419
+    "GMAT_Combined": 87.77732346890284
   },
   {
     "School": "Cornell University",
@@ -292,11 +314,12 @@
     "EmployedAtGrad": 0.72,
     "Employed3Mo": 0.81,
     "AvgSalaryBonus": 194716.0,
+    "SalaryByProfession": 1.0380032051118346,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.293,
     "PeerScore": 4.1,
     "RecruiterScore": 3.9,
-    "GMAT_Combined": 80.30142781597038
+    "GMAT_Combined": 43.19727891156464
   },
   {
     "School": "CUNY Bernard M. Baruch College",
@@ -305,11 +328,12 @@
     "EmployedAtGrad": 0.61,
     "Employed3Mo": 0.756,
     "AvgSalaryBonus": 115741.0,
-    "MedianGPA": 3.5090453577742067,
+    "SalaryByProfession": 0.696037353669651,
+    "MedianGPA": 3.5060783120755805,
     "AcceptanceRate": 0.374,
     "PeerScore": 3.0,
     "RecruiterScore": 3.2,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 31.56227123913869
   },
   {
     "School": "Dartmouth College",
@@ -318,11 +342,12 @@
     "EmployedAtGrad": 0.772,
     "Employed3Mo": 0.877,
     "AvgSalaryBonus": 198517.0,
+    "SalaryByProfession": 1.086377154457279,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.283,
     "PeerScore": 4.1,
     "RecruiterScore": 4.2,
-    "GMAT_Combined": 86.92864030858244
+    "GMAT_Combined": 82.36750284940109
   },
   {
     "School": "Drexel University",
@@ -331,11 +356,12 @@
     "EmployedAtGrad": 0.389,
     "Employed3Mo": 0.722,
     "AvgSalaryBonus": 71467.0,
+    "SalaryByProfession": 0.4935480875454025,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.716,
     "PeerScore": 2.8,
     "RecruiterScore": 3.2,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 34.193664527261895
   },
   {
     "School": "Duke University",
@@ -344,11 +370,12 @@
     "EmployedAtGrad": 0.71,
     "Employed3Mo": 0.808,
     "AvgSalaryBonus": 190778.0,
+    "SalaryByProfession": 1.0099160778059748,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.24,
     "PeerScore": 4.3,
     "RecruiterScore": 4.0,
-    "GMAT_Combined": 73.98837933181159
+    "GMAT_Combined": 63.31321437582291
   },
   {
     "School": "Duquesne University",
@@ -357,11 +384,12 @@
     "EmployedAtGrad": 0.682,
     "Employed3Mo": 0.909,
     "AvgSalaryBonus": 65788.0,
+    "SalaryByProfession": 0.41243110682560735,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.96,
     "PeerScore": 2.3,
     "RecruiterScore": 2.6,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 11.801744089104899
   },
   {
     "School": "Emory University",
@@ -370,11 +398,12 @@
     "EmployedAtGrad": 0.663,
     "Employed3Mo": 0.807,
     "AvgSalaryBonus": 181550.0,
+    "SalaryByProfession": 0.9983345088489087,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.332,
     "PeerScore": 3.8,
     "RecruiterScore": 3.5,
-    "GMAT_Combined": 64.29872495446264
+    "GMAT_Combined": 51.23737060683071
   },
   {
     "School": "Florida State University",
@@ -383,11 +412,12 @@
     "EmployedAtGrad": 0.504,
     "Employed3Mo": 0.652,
     "AvgSalaryBonus": 67490.0,
+    "SalaryByProfession": 0.48118872693923864,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.477,
     "PeerScore": 3.0,
     "RecruiterScore": 3.0,
-    "GMAT_Combined": 0.19672131147540983
+    "GMAT_Combined": 24.646996838777664
   },
   {
     "School": "Fordham University",
@@ -396,11 +426,12 @@
     "EmployedAtGrad": 0.507,
     "Employed3Mo": 0.84,
     "AvgSalaryBonus": 135866.0,
+    "SalaryByProfession": 0.810792292026308,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.671,
     "PeerScore": 3.2,
     "RecruiterScore": 3.2,
-    "GMAT_Combined": 28.45901639344262
+    "GMAT_Combined": 23.295333851840706
   },
   {
     "School": "George Washington University",
@@ -409,11 +440,12 @@
     "EmployedAtGrad": 0.477,
     "Employed3Mo": 0.708,
     "AvgSalaryBonus": 122929.0,
+    "SalaryByProfession": 0.6952011624267818,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.251,
     "PeerScore": 3.2,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 22.721311475409838
+    "GMAT_Combined": 29.775201966982788
   },
   {
     "School": "Georgetown University",
@@ -422,11 +454,12 @@
     "EmployedAtGrad": 0.539,
     "Employed3Mo": 0.8,
     "AvgSalaryBonus": 169866.0,
+    "SalaryByProfession": 0.9853199167372764,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.644,
     "PeerScore": 3.8,
     "RecruiterScore": 3.6,
-    "GMAT_Combined": 72.65549662487946
+    "GMAT_Combined": 54.97738282377851
   },
   {
     "School": "Georgia Institute of Technology",
@@ -435,11 +468,12 @@
     "EmployedAtGrad": 0.667,
     "Employed3Mo": 0.856,
     "AvgSalaryBonus": 163531.0,
+    "SalaryByProfession": 0.9590860202555032,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.178,
     "PeerScore": 3.7,
     "RecruiterScore": 3.5,
-    "GMAT_Combined": 86.57786885245902
+    "GMAT_Combined": 75.75222396650967
   },
   {
     "School": "Harvard University",
@@ -448,11 +482,12 @@
     "EmployedAtGrad": 0.614,
     "Employed3Mo": 0.804,
     "AvgSalaryBonus": 197890.0,
-    "MedianGPA": 3.706767554191675,
+    "SalaryByProfession": 1.2035644671842203,
+    "MedianGPA": 3.7068760758080597,
     "AcceptanceRate": 0.112,
     "PeerScore": 4.8,
     "RecruiterScore": 4.5,
-    "GMAT_Combined": 94.81132075471699
+    "GMAT_Combined": 80.59083212385099
   },
   {
     "School": "Indiana University",
@@ -461,11 +496,12 @@
     "EmployedAtGrad": 0.749,
     "Employed3Mo": 0.891,
     "AvgSalaryBonus": 161422.0,
+    "SalaryByProfession": 0.9244427969396731,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.266,
     "PeerScore": 3.9,
     "RecruiterScore": 3.6,
-    "GMAT_Combined": 70.1005961251863
+    "GMAT_Combined": 47.34032063826585
   },
   {
     "School": "Iowa State University",
@@ -474,11 +510,12 @@
     "EmployedAtGrad": 0.863,
     "Employed3Mo": 0.945,
     "AvgSalaryBonus": 82721.0,
+    "SalaryByProfession": 0.5490080235544886,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.735,
     "PeerScore": 3.0,
     "RecruiterScore": 4.1,
-    "GMAT_Combined": 40.61219262295082
+    "GMAT_Combined": 25.814894892999185
   },
   {
     "School": "Kent State University",
@@ -487,11 +524,12 @@
     "EmployedAtGrad": 0.326,
     "Employed3Mo": 0.744,
     "AvgSalaryBonus": 67561.0,
+    "SalaryByProfession": 0.47226166288745425,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.653,
     "PeerScore": 2.4,
     "RecruiterScore": 2.6,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 23.798025559540093
   },
   {
     "School": "La Salle University",
@@ -500,11 +538,12 @@
     "EmployedAtGrad": 0.633,
     "Employed3Mo": 0.857,
     "AvgSalaryBonus": 66885.0,
+    "SalaryByProfession": 0.4615137079867092,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.889,
     "PeerScore": 2.2,
     "RecruiterScore": 2.9,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 20.04816825881642
   },
   {
     "School": "Lehigh University",
@@ -513,11 +552,12 @@
     "EmployedAtGrad": 0.344,
     "Employed3Mo": 0.688,
     "AvgSalaryBonus": 118148.0,
+    "SalaryByProfession": 0.7463031488966384,
     "MedianGPA": 3.8,
     "AcceptanceRate": 0.4,
     "PeerScore": 2.8,
     "RecruiterScore": 3.0,
-    "GMAT_Combined": 12.393442622950818
+    "GMAT_Combined": 39.42514232024957
   },
   {
     "School": "Lipscomb University",
@@ -526,11 +566,12 @@
     "EmployedAtGrad": 0.75,
     "Employed3Mo": 0.958,
     "AvgSalaryBonus": 65387.0,
+    "SalaryByProfession": 0.6556725425400346,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.909,
     "PeerScore": 1.9,
-    "RecruiterScore": 2.7717721026880744,
-    "GMAT_Combined": 51.45533623285381
+    "RecruiterScore": 2.771772140791119,
+    "GMAT_Combined": 5.96818782250799
   },
   {
     "School": "Louisiana State University--Baton Rouge",
@@ -539,11 +580,12 @@
     "EmployedAtGrad": 0.687,
     "Employed3Mo": 0.878,
     "AvgSalaryBonus": 68577.0,
+    "SalaryByProfession": 0.39228926867216685,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.565,
     "PeerScore": 2.9,
     "RecruiterScore": 3.1,
-    "GMAT_Combined": 2.0655737704918034
+    "GMAT_Combined": 25.7253249034071
   },
   {
     "School": "Louisiana Tech University",
@@ -552,11 +594,12 @@
     "EmployedAtGrad": 0.551,
     "Employed3Mo": 0.878,
     "AvgSalaryBonus": 60538.0,
+    "SalaryByProfession": 0.4713240305795032,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.759,
     "PeerScore": 2.1,
     "RecruiterScore": 4.1,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 16.49151929778034
   },
   {
     "School": "Loyola University Maryland",
@@ -565,11 +608,12 @@
     "EmployedAtGrad": 0.74,
     "Employed3Mo": 0.98,
     "AvgSalaryBonus": 75051.0,
+    "SalaryByProfession": 0.5354936283001861,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.5,
     "PeerScore": 2.9,
     "RecruiterScore": 2.6,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 25.270304030242475
   },
   {
     "School": "Massachusetts Institute of Technology",
@@ -578,11 +622,12 @@
     "EmployedAtGrad": 0.644,
     "Employed3Mo": 0.818,
     "AvgSalaryBonus": 197331.0,
+    "SalaryByProfession": 1.1566943558811988,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.188,
     "PeerScore": 4.7,
     "RecruiterScore": 4.4,
-    "GMAT_Combined": 87.83456005352961
+    "GMAT_Combined": 73.81129348472793
   },
   {
     "School": "Michigan State University",
@@ -591,11 +636,12 @@
     "EmployedAtGrad": 0.578,
     "Employed3Mo": 0.755,
     "AvgSalaryBonus": 130035.0,
+    "SalaryByProfession": 0.8247244099393106,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.124,
     "PeerScore": 3.4,
     "RecruiterScore": 3.3,
-    "GMAT_Combined": 56.9535519125683
+    "GMAT_Combined": 35.93117397116907
   },
   {
     "School": "Michigan Technological University",
@@ -604,11 +650,12 @@
     "EmployedAtGrad": 0.483,
     "Employed3Mo": 0.897,
     "AvgSalaryBonus": 74406.0,
+    "SalaryByProfession": 0.6419563083373542,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.027,
     "PeerScore": 2.2,
-    "RecruiterScore": 2.6270443970359714,
-    "GMAT_Combined": 51.45533623285381
+    "RecruiterScore": 2.6198828599872264,
+    "GMAT_Combined": 28.7101070845558
   },
   {
     "School": "Mississippi State University",
@@ -617,11 +664,12 @@
     "EmployedAtGrad": 0.483,
     "Employed3Mo": 0.775,
     "AvgSalaryBonus": 62010.0,
+    "SalaryByProfession": 0.4204456654280324,
     "MedianGPA": 3.8,
     "AcceptanceRate": 0.598,
     "PeerScore": 2.6,
     "RecruiterScore": 2.6,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 15.698309326889767
   },
   {
     "School": "New York University",
@@ -630,11 +678,12 @@
     "EmployedAtGrad": 0.77,
     "Employed3Mo": 0.853,
     "AvgSalaryBonus": 201106.0,
+    "SalaryByProfession": 1.073564414157907,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.236,
     "PeerScore": 4.3,
     "RecruiterScore": 4.0,
-    "GMAT_Combined": 95.93889716840536
+    "GMAT_Combined": 90.56539921265949
   },
   {
     "School": "North Carolina A&T State University",
@@ -643,11 +692,12 @@
     "EmployedAtGrad": 0.414,
     "Employed3Mo": 0.943,
     "AvgSalaryBonus": 92300.0,
+    "SalaryByProfession": 0.7852639678918831,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.951,
     "PeerScore": 2.1,
     "RecruiterScore": 3.0,
-    "GMAT_Combined": 39.016393442622956
+    "GMAT_Combined": 40.432033719704954
   },
   {
     "School": "Northeastern University",
@@ -656,11 +706,12 @@
     "EmployedAtGrad": 0.306,
     "Employed3Mo": 0.643,
     "AvgSalaryBonus": 102598.0,
+    "SalaryByProfession": 0.7440773602211096,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.194,
     "PeerScore": 3.0,
     "RecruiterScore": 2.6,
-    "GMAT_Combined": 18.13114754098361
+    "GMAT_Combined": 43.9304531085353
   },
   {
     "School": "Northwestern University",
@@ -669,11 +720,12 @@
     "EmployedAtGrad": 0.701,
     "Employed3Mo": 0.864,
     "AvgSalaryBonus": 197394.0,
+    "SalaryByProfession": 1.0964948990190488,
     "MedianGPA": 3.8,
     "AcceptanceRate": 0.281,
     "PeerScore": 4.5,
     "RecruiterScore": 4.5,
-    "GMAT_Combined": 94.00301104048177
+    "GMAT_Combined": 77.96717171717172
   },
   {
     "School": "Ohio State University",
@@ -682,11 +734,12 @@
     "EmployedAtGrad": 0.663,
     "Employed3Mo": 0.807,
     "AvgSalaryBonus": 140472.0,
+    "SalaryByProfession": 0.87170007110113,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.133,
     "PeerScore": 3.7,
     "RecruiterScore": 3.3,
-    "GMAT_Combined": 76.98087431693989
+    "GMAT_Combined": 64.38356164383563
   },
   {
     "School": "Oklahoma State University",
@@ -695,11 +748,12 @@
     "EmployedAtGrad": 0.766,
     "Employed3Mo": 0.961,
     "AvgSalaryBonus": 69256.0,
+    "SalaryByProfession": 0.4800994621466485,
     "MedianGPA": 3.8,
     "AcceptanceRate": 0.315,
     "PeerScore": 3.0,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 24.479646343709703
+    "GMAT_Combined": 8.695264255522835
   },
   {
     "School": "Pepperdine University",
@@ -708,11 +762,12 @@
     "EmployedAtGrad": 0.526,
     "Employed3Mo": 0.658,
     "AvgSalaryBonus": 101247.0,
+    "SalaryByProfession": 0.5390969483538879,
     "MedianGPA": 3.2,
     "AcceptanceRate": 0.866,
     "PeerScore": 3.0,
     "RecruiterScore": 3.3,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 50.89748770827482
   },
   {
     "School": "Portland State University",
@@ -721,11 +776,12 @@
     "EmployedAtGrad": 0.571,
     "Employed3Mo": 0.786,
     "AvgSalaryBonus": 98860.0,
+    "SalaryByProfession": 0.6879957041307485,
     "MedianGPA": 3.2,
     "AcceptanceRate": 0.85,
     "PeerScore": 2.4,
     "RecruiterScore": 2.6,
-    "GMAT_Combined": 36.59016393442623
+    "GMAT_Combined": 64.35603634979556
   },
   {
     "School": "Quinnipiac University",
@@ -734,11 +790,12 @@
     "EmployedAtGrad": 0.472,
     "Employed3Mo": 0.809,
     "AvgSalaryBonus": 76726.0,
+    "SalaryByProfession": 0.5289084823616466,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.774,
     "PeerScore": 2.5,
     "RecruiterScore": 2.5,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 14.903988080261456
   },
   {
     "School": "Rensselaer Polytechnic Institute",
@@ -747,11 +804,12 @@
     "EmployedAtGrad": 0.547,
     "Employed3Mo": 0.792,
     "AvgSalaryBonus": 90778.0,
+    "SalaryByProfession": 0.5484180639841855,
     "MedianGPA": 3.2,
     "AcceptanceRate": 0.556,
     "PeerScore": 3.0,
     "RecruiterScore": 3.3,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 39.23156960785491
   },
   {
     "School": "Rice University",
@@ -760,11 +818,12 @@
     "EmployedAtGrad": 0.575,
     "Employed3Mo": 0.718,
     "AvgSalaryBonus": 171968.0,
+    "SalaryByProfession": 0.9946168977259929,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.342,
     "PeerScore": 3.6,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 72.46532156368221
+    "GMAT_Combined": 49.00126806093837
   },
   {
     "School": "Rochester Institute of Technology",
@@ -773,11 +832,12 @@
     "EmployedAtGrad": 0.46,
     "Employed3Mo": 0.73,
     "AvgSalaryBonus": 84823.0,
+    "SalaryByProfession": 0.6277188049622098,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.659,
     "PeerScore": 3.0,
     "RecruiterScore": 3.2,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 14.072026298267561
   },
   {
     "School": "Rutgers University--Newark and New Brunswick",
@@ -786,11 +846,12 @@
     "EmployedAtGrad": 0.595,
     "Employed3Mo": 0.833,
     "AvgSalaryBonus": 112412.0,
+    "SalaryByProfession": 0.8376495005504556,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.456,
     "PeerScore": 3.0,
     "RecruiterScore": 3.2,
-    "GMAT_Combined": 61.44195383071261
+    "GMAT_Combined": 45.513518643357834
   },
   {
     "School": "Southern Methodist University",
@@ -799,11 +860,12 @@
     "EmployedAtGrad": 0.606,
     "Employed3Mo": 0.84,
     "AvgSalaryBonus": 148020.0,
+    "SalaryByProfession": 0.8976891866066493,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.271,
     "PeerScore": 3.2,
     "RecruiterScore": 3.0,
-    "GMAT_Combined": 63.278688524590166
+    "GMAT_Combined": 50.037727683275634
   },
   {
     "School": "Saint Louis University",
@@ -812,11 +874,12 @@
     "EmployedAtGrad": 0.333,
     "Employed3Mo": 0.636,
     "AvgSalaryBonus": 68649.0,
+    "SalaryByProfession": 0.41040380679832955,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.47,
     "PeerScore": 3.0,
     "RecruiterScore": 3.5,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 24.14210068591424
   },
   {
     "School": "Stanford University",
@@ -825,11 +888,12 @@
     "EmployedAtGrad": 0.557,
     "Employed3Mo": 0.803,
     "AvgSalaryBonus": 206157.0,
+    "SalaryByProfession": 1.3163850380507245,
     "MedianGPA": 3.8,
     "AcceptanceRate": 0.068,
     "PeerScore": 4.8,
     "RecruiterScore": 4.5,
-    "GMAT_Combined": 97.51663690959259
+    "GMAT_Combined": 95.58270676691728
   },
   {
     "School": "Stevens Institute of Technology",
@@ -838,11 +902,12 @@
     "EmployedAtGrad": 0.382,
     "Employed3Mo": 0.775,
     "AvgSalaryBonus": 85900.0,
+    "SalaryByProfession": 0.5991799119962423,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.559,
     "PeerScore": 2.7,
     "RecruiterScore": 4.2,
-    "GMAT_Combined": 26.39344262295082
+    "GMAT_Combined": 72.64840182648402
   },
   {
     "School": "University at Albany--SUNY",
@@ -851,11 +916,12 @@
     "EmployedAtGrad": 0.383,
     "Employed3Mo": 0.832,
     "AvgSalaryBonus": 61355.0,
+    "SalaryByProfession": 0.5112122073522407,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.846,
     "PeerScore": 2.4,
     "RecruiterScore": 2.6,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 16.11516130720097
   },
   {
     "School": "Syracuse University",
@@ -864,11 +930,12 @@
     "EmployedAtGrad": 0.424,
     "Employed3Mo": 0.667,
     "AvgSalaryBonus": 125692.0,
+    "SalaryByProfession": 0.9012278921185298,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.612,
     "PeerScore": 3.1,
     "RecruiterScore": 3.0,
-    "GMAT_Combined": 18.360655737704917
+    "GMAT_Combined": 52.8204408328163
   },
   {
     "School": "Texas A&M University--College Station",
@@ -877,11 +944,12 @@
     "EmployedAtGrad": 0.694,
     "Employed3Mo": 0.823,
     "AvgSalaryBonus": 147087.0,
+    "SalaryByProfession": 0.9380397758123825,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.248,
     "PeerScore": 3.4,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 55.803571428571416
+    "GMAT_Combined": 28.289427467509658
   },
   {
     "School": "Texas Christian University",
@@ -890,11 +958,12 @@
     "EmployedAtGrad": 0.735,
     "Employed3Mo": 0.918,
     "AvgSalaryBonus": 135308.0,
+    "SalaryByProfession": 0.7897478823652551,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.274,
     "PeerScore": 2.9,
     "RecruiterScore": 3.0,
-    "GMAT_Combined": 34.60553278688525
+    "GMAT_Combined": 16.29488852091592
   },
   {
     "School": "Texas Tech University",
@@ -903,11 +972,12 @@
     "EmployedAtGrad": 0.324,
     "Employed3Mo": 0.878,
     "AvgSalaryBonus": 65200.0,
+    "SalaryByProfession": 0.4992225152984464,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.797,
     "PeerScore": 2.8,
     "RecruiterScore": 2.9,
-    "GMAT_Combined": 4.129886506935686
+    "GMAT_Combined": 1.7857142857142856
   },
   {
     "School": "University of Texas--Austin",
@@ -916,11 +986,12 @@
     "EmployedAtGrad": 0.655,
     "Employed3Mo": 0.782,
     "AvgSalaryBonus": 177762.0,
+    "SalaryByProfession": 1.031829471949273,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.327,
     "PeerScore": 4.0,
     "RecruiterScore": 3.9,
-    "GMAT_Combined": 81.14082235958077
+    "GMAT_Combined": 71.57874489525535
   },
   {
     "School": "Tulane University",
@@ -929,11 +1000,12 @@
     "EmployedAtGrad": 0.639,
     "Employed3Mo": 0.917,
     "AvgSalaryBonus": 109143.0,
+    "SalaryByProfession": 0.7177054770519997,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.477,
     "PeerScore": 3.3,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 28.515962036238136
+    "GMAT_Combined": 17.07060063224447
   },
   {
     "School": "University at Buffalo--SUNY",
@@ -942,11 +1014,12 @@
     "EmployedAtGrad": 0.575,
     "Employed3Mo": 0.85,
     "AvgSalaryBonus": 83500.0,
+    "SalaryByProfession": 0.5594711029552988,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.695,
     "PeerScore": 2.8,
     "RecruiterScore": 3.9,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 32.169497157455034
   },
   {
     "School": "University of Alabama",
@@ -955,11 +1028,12 @@
     "EmployedAtGrad": 0.727,
     "Employed3Mo": 0.88,
     "AvgSalaryBonus": 77843.0,
+    "SalaryByProfession": 0.47848337837182214,
     "MedianGPA": 3.8,
     "AcceptanceRate": 0.632,
     "PeerScore": 3.1,
     "RecruiterScore": 3.1,
-    "GMAT_Combined": 40.1288056206089
+    "GMAT_Combined": 29.70889694128442
   },
   {
     "School": "University of Arizona",
@@ -968,11 +1042,12 @@
     "EmployedAtGrad": 0.468,
     "Employed3Mo": 0.617,
     "AvgSalaryBonus": 99900.0,
+    "SalaryByProfession": 0.7776132652485735,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.453,
     "PeerScore": 3.4,
     "RecruiterScore": 3.1,
-    "GMAT_Combined": 58.65209471766849
+    "GMAT_Combined": 72.40252897787146
   },
   {
     "School": "University of Arkansas--Fayetteville",
@@ -981,11 +1056,12 @@
     "EmployedAtGrad": 0.588,
     "Employed3Mo": 0.838,
     "AvgSalaryBonus": 84785.0,
+    "SalaryByProfession": 0.5883271209674047,
     "MedianGPA": 3.8,
     "AcceptanceRate": 0.293,
     "PeerScore": 3.2,
     "RecruiterScore": 2.9,
-    "GMAT_Combined": 10.229508196721312
+    "GMAT_Combined": 16.767831264880254
   },
   {
     "School": "University of California, Berkeley",
@@ -994,11 +1070,12 @@
     "EmployedAtGrad": 0.643,
     "Employed3Mo": 0.838,
     "AvgSalaryBonus": 187801.0,
+    "SalaryByProfession": 1.1386536578398934,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.214,
     "PeerScore": 4.5,
     "RecruiterScore": 4.1,
-    "GMAT_Combined": 86.80074362007775
+    "GMAT_Combined": 83.57156542088048
   },
   {
     "School": "University of California--Davis",
@@ -1007,11 +1084,12 @@
     "EmployedAtGrad": 0.417,
     "Employed3Mo": 0.667,
     "AvgSalaryBonus": 109864.0,
+    "SalaryByProfession": 0.9139109078114771,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.395,
     "PeerScore": 3.4,
     "RecruiterScore": 3.5,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 44.55128205128205
   },
   {
     "School": "University of California--Irvine",
@@ -1020,11 +1098,12 @@
     "EmployedAtGrad": 0.479,
     "Employed3Mo": 0.646,
     "AvgSalaryBonus": 139750.0,
+    "SalaryByProfession": 1.0042242651540705,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.264,
     "PeerScore": 3.3,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 65.06935687263555
+    "GMAT_Combined": 42.57897113701007
   },
   {
     "School": "University of California--Los Angeles",
@@ -1033,11 +1112,12 @@
     "EmployedAtGrad": 0.566,
     "Employed3Mo": 0.757,
     "AvgSalaryBonus": 173174.0,
+    "SalaryByProfession": 1.0463963170151265,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.31,
     "PeerScore": 4.2,
     "RecruiterScore": 3.9,
-    "GMAT_Combined": 89.20765027322403
+    "GMAT_Combined": 79.60719930754176
   },
   {
     "School": "University of California--Riverside",
@@ -1046,11 +1126,12 @@
     "EmployedAtGrad": 0.23,
     "Employed3Mo": 0.527,
     "AvgSalaryBonus": 76810.0,
+    "SalaryByProfession": 0.5261100880376048,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.436,
     "PeerScore": 2.9,
     "RecruiterScore": 3.2,
-    "GMAT_Combined": 0.4426229508196721
+    "GMAT_Combined": 28.753073410607655
   },
   {
     "School": "University of California--San Diego",
@@ -1059,11 +1140,12 @@
     "EmployedAtGrad": 0.438,
     "Employed3Mo": 0.646,
     "AvgSalaryBonus": 121932.0,
+    "SalaryByProfession": 0.8102712764964853,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.365,
     "PeerScore": 3.2,
     "RecruiterScore": 3.3,
-    "GMAT_Combined": 67.21311475409837
+    "GMAT_Combined": 69.51176677204076
   },
   {
     "School": "University of Chicago",
@@ -1072,11 +1154,12 @@
     "EmployedAtGrad": 0.747,
     "Employed3Mo": 0.86,
     "AvgSalaryBonus": 200968.0,
+    "SalaryByProfession": 1.1020506429023242,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.273,
     "PeerScore": 4.7,
     "RecruiterScore": 4.5,
-    "GMAT_Combined": 90.60828300258844
+    "GMAT_Combined": 81.11592799173911
   },
   {
     "School": "University of Cincinnati",
@@ -1085,11 +1168,12 @@
     "EmployedAtGrad": 0.766,
     "Employed3Mo": 0.957,
     "AvgSalaryBonus": 82205.0,
+    "SalaryByProfession": 0.5432151223905062,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.612,
     "PeerScore": 3.0,
     "RecruiterScore": 3.1,
-    "GMAT_Combined": 23.737704918032787
+    "GMAT_Combined": 52.39199157007377
   },
   {
     "School": "University of Colorado--Boulder",
@@ -1098,11 +1182,12 @@
     "EmployedAtGrad": 0.364,
     "Employed3Mo": 0.602,
     "AvgSalaryBonus": 104541.0,
+    "SalaryByProfession": 0.7197128100478036,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.73,
     "PeerScore": 3.4,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 27.254098360655732
+    "GMAT_Combined": 21.041432379063323
   },
   {
     "School": "University of Denver",
@@ -1111,11 +1196,12 @@
     "EmployedAtGrad": 0.429,
     "Employed3Mo": 0.657,
     "AvgSalaryBonus": 101574.0,
+    "SalaryByProfession": 0.7150962880126066,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.535,
     "PeerScore": 2.8,
     "RecruiterScore": 3.1,
-    "GMAT_Combined": 19.770491803278688
+    "GMAT_Combined": 48.777657288419924
   },
   {
     "School": "University of Detroit Mercy",
@@ -1124,11 +1210,12 @@
     "EmployedAtGrad": 0.4,
     "Employed3Mo": 0.925,
     "AvgSalaryBonus": 77786.0,
+    "SalaryByProfession": 0.5048156747545434,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.947,
     "PeerScore": 2.4,
     "RecruiterScore": 4.0,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 28.790368171546127
   },
   {
     "School": "University of Florida",
@@ -1137,11 +1224,12 @@
     "EmployedAtGrad": 0.717,
     "Employed3Mo": 0.883,
     "AvgSalaryBonus": 141368.0,
+    "SalaryByProfession": 0.8706476679205153,
     "MedianGPA": 3.2,
     "AcceptanceRate": 0.133,
     "PeerScore": 3.6,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 43.473142657830486
+    "GMAT_Combined": 24.991511297691076
   },
   {
     "School": "University of Georgia",
@@ -1150,11 +1238,12 @@
     "EmployedAtGrad": 0.867,
     "Employed3Mo": 0.933,
     "AvgSalaryBonus": 146363.0,
+    "SalaryByProfession": 0.8609706793300326,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.239,
     "PeerScore": 3.5,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 59.74978429680758
+    "GMAT_Combined": 50.834004834810656
   },
   {
     "School": "University of Kansas",
@@ -1163,11 +1252,12 @@
     "EmployedAtGrad": 0.796,
     "Employed3Mo": 0.959,
     "AvgSalaryBonus": 88935.0,
+    "SalaryByProfession": 0.6429448161215239,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.654,
     "PeerScore": 3.0,
     "RecruiterScore": 3.3,
-    "GMAT_Combined": 43.0327868852459
+    "GMAT_Combined": 16.964285714285715
   },
   {
     "School": "University of Kentucky",
@@ -1176,11 +1266,12 @@
     "EmployedAtGrad": 0.721,
     "Employed3Mo": 0.946,
     "AvgSalaryBonus": 80399.0,
+    "SalaryByProfession": 0.5465840893296945,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.733,
     "PeerScore": 3.0,
     "RecruiterScore": 3.9,
-    "GMAT_Combined": 30.737704918032787
+    "GMAT_Combined": 23.28767123287671
   },
   {
     "School": "University of Maryland--College Park",
@@ -1189,11 +1280,12 @@
     "EmployedAtGrad": 0.53,
     "Employed3Mo": 0.788,
     "AvgSalaryBonus": 135689.0,
+    "SalaryByProfession": 0.8974063348085437,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.372,
     "PeerScore": 3.5,
     "RecruiterScore": 3.1,
-    "GMAT_Combined": 27.049180327868854
+    "GMAT_Combined": 27.200561995082545
   },
   {
     "School": "University of Massachusetts--Amherst",
@@ -1202,11 +1294,12 @@
     "EmployedAtGrad": 0.348,
     "Employed3Mo": 0.783,
     "AvgSalaryBonus": 106468.0,
+    "SalaryByProfession": 0.7479955480031701,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.319,
     "PeerScore": 3.1,
     "RecruiterScore": 3.0,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 37.47119118836362
   },
   {
     "School": "University of Miami",
@@ -1215,11 +1308,12 @@
     "EmployedAtGrad": 0.554,
     "Employed3Mo": 0.911,
     "AvgSalaryBonus": 108111.0,
+    "SalaryByProfession": 0.773173047894975,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.195,
     "PeerScore": 3.3,
     "RecruiterScore": 3.1,
-    "GMAT_Combined": 47.47540983606557
+    "GMAT_Combined": 57.583421145064975
   },
   {
     "School": "University of Michigan--Ann Arbor",
@@ -1228,11 +1322,12 @@
     "EmployedAtGrad": 0.762,
     "Employed3Mo": 0.84,
     "AvgSalaryBonus": 190202.0,
+    "SalaryByProfession": 1.0478297744663714,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.302,
     "PeerScore": 4.3,
     "RecruiterScore": 4.1,
-    "GMAT_Combined": 86.93647540983608
+    "GMAT_Combined": 84.65343636576515
   },
   {
     "School": "University of Minnesota--Duluth",
@@ -1241,11 +1336,12 @@
     "EmployedAtGrad": 0.167,
     "Employed3Mo": 0.933,
     "AvgSalaryBonus": 69470.0,
+    "SalaryByProfession": 0.5406344771901468,
     "MedianGPA": 3.6,
     "AcceptanceRate": 1.0,
     "PeerScore": 2.4,
-    "RecruiterScore": 3.2961909666563147,
-    "GMAT_Combined": 4.459016393442623
+    "RecruiterScore": 3.3340533569830715,
+    "GMAT_Combined": 32.852125043905865
   },
   {
     "School": "University of Minnesota--Twin Cities",
@@ -1254,11 +1350,12 @@
     "EmployedAtGrad": 0.552,
     "Employed3Mo": 0.752,
     "AvgSalaryBonus": 157874.0,
+    "SalaryByProfession": 0.9114959801886471,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.395,
     "PeerScore": 3.6,
     "RecruiterScore": 3.3,
-    "GMAT_Combined": 45.27868852459016
+    "GMAT_Combined": 40.49292092190434
   },
   {
     "School": "University of Mississippi",
@@ -1267,11 +1364,12 @@
     "EmployedAtGrad": 0.679,
     "Employed3Mo": 0.982,
     "AvgSalaryBonus": 76691.0,
+    "SalaryByProfession": 0.5279118167367775,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.48,
     "PeerScore": 2.7,
     "RecruiterScore": 2.8,
-    "GMAT_Combined": 10.557377049180328
+    "GMAT_Combined": 8.381725124190877
   },
   {
     "School": "University of New Hampshire",
@@ -1280,11 +1378,12 @@
     "EmployedAtGrad": 0.754,
     "Employed3Mo": 0.892,
     "AvgSalaryBonus": 66875.0,
+    "SalaryByProfession": 0.4903290318125476,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.753,
     "PeerScore": 2.6,
     "RecruiterScore": 2.1,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 19.990923175530796
   },
   {
     "School": "University of North Carolina--Chapel Hill",
@@ -1293,11 +1392,12 @@
     "EmployedAtGrad": 0.695,
     "Employed3Mo": 0.847,
     "AvgSalaryBonus": 165888.0,
+    "SalaryByProfession": 0.9425985190920022,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.379,
     "PeerScore": 4.0,
     "RecruiterScore": 3.5,
-    "GMAT_Combined": 77.01384963256076
+    "GMAT_Combined": 58.78520161668261
   },
   {
     "School": "University of Notre Dame",
@@ -1306,11 +1406,12 @@
     "EmployedAtGrad": 0.605,
     "Employed3Mo": 0.715,
     "AvgSalaryBonus": 164301.0,
+    "SalaryByProfession": 0.9718824838780346,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.338,
     "PeerScore": 3.7,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 54.112253403723244
+    "GMAT_Combined": 41.36712113717984
   },
   {
     "School": "The University of Oklahoma",
@@ -1319,11 +1420,12 @@
     "EmployedAtGrad": 0.511,
     "Employed3Mo": 0.894,
     "AvgSalaryBonus": 84835.0,
+    "SalaryByProfession": 0.544967489187678,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.51,
     "PeerScore": 3.0,
     "RecruiterScore": 3.2,
-    "GMAT_Combined": 22.918032786885245
+    "GMAT_Combined": 12.58891063274625
   },
   {
     "School": "University of Oregon",
@@ -1332,11 +1434,12 @@
     "EmployedAtGrad": 0.348,
     "Employed3Mo": 0.536,
     "AvgSalaryBonus": 95253.0,
+    "SalaryByProfession": 0.6966554635797153,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.667,
     "PeerScore": 3.1,
     "RecruiterScore": 3.3,
-    "GMAT_Combined": 45.40983606557377
+    "GMAT_Combined": 79.68387776606956
   },
   {
     "School": "University of Pennsylvania",
@@ -1345,11 +1448,12 @@
     "EmployedAtGrad": 0.733,
     "Employed3Mo": 0.876,
     "AvgSalaryBonus": 201902.0,
+    "SalaryByProfession": 1.1657080770373074,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.186,
     "PeerScore": 4.7,
     "RecruiterScore": 4.6,
-    "GMAT_Combined": 96.97846351655416
+    "GMAT_Combined": 70.83333333333334
   },
   {
     "School": "University of Pittsburgh",
@@ -1358,11 +1462,12 @@
     "EmployedAtGrad": 0.525,
     "Employed3Mo": 0.738,
     "AvgSalaryBonus": 121143.0,
+    "SalaryByProfession": 0.7625825665940136,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.493,
     "PeerScore": 3.3,
     "RecruiterScore": 3.5,
-    "GMAT_Combined": 49.93694829760404
+    "GMAT_Combined": 29.393085839345055
   },
   {
     "School": "University of Rochester",
@@ -1371,11 +1476,12 @@
     "EmployedAtGrad": 0.606,
     "Employed3Mo": 0.874,
     "AvgSalaryBonus": 150703.0,
+    "SalaryByProfession": 0.9143397777393552,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.133,
     "PeerScore": 3.3,
     "RecruiterScore": 3.1,
-    "GMAT_Combined": 69.183815835368
+    "GMAT_Combined": 47.93318108553658
   },
   {
     "School": "University of San Diego",
@@ -1384,11 +1490,12 @@
     "EmployedAtGrad": 0.471,
     "Employed3Mo": 0.662,
     "AvgSalaryBonus": 98346.0,
+    "SalaryByProfession": 0.6629361046692516,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.835,
     "PeerScore": 2.9,
     "RecruiterScore": 2.8,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 65.79964804630826
   },
   {
     "School": "University of San Francisco",
@@ -1397,11 +1504,12 @@
     "EmployedAtGrad": 0.246,
     "Employed3Mo": 0.446,
     "AvgSalaryBonus": 104512.0,
+    "SalaryByProfession": 0.7754040503082149,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.415,
     "PeerScore": 2.8,
     "RecruiterScore": 2.9,
-    "GMAT_Combined": 25.24590163934426
+    "GMAT_Combined": 20.516332982086407
   },
   {
     "School": "University of South Carolina",
@@ -1410,11 +1518,12 @@
     "EmployedAtGrad": 0.5,
     "Employed3Mo": 0.8,
     "AvgSalaryBonus": 109284.0,
+    "SalaryByProfession": 0.7699070083001628,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.55,
     "PeerScore": 3.2,
     "RecruiterScore": 3.1,
-    "GMAT_Combined": 15.245901639344261
+    "GMAT_Combined": 34.61538461538461
   },
   {
     "School": "University of South Florida",
@@ -1423,11 +1532,12 @@
     "EmployedAtGrad": 0.528,
     "Employed3Mo": 0.861,
     "AvgSalaryBonus": 50949.0,
+    "SalaryByProfession": 0.40214324644319294,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.536,
     "PeerScore": 2.9,
     "RecruiterScore": 2.0,
-    "GMAT_Combined": 4.161412358133669
+    "GMAT_Combined": 10.660344221988057
   },
   {
     "School": "University of Southern California",
@@ -1436,11 +1546,12 @@
     "EmployedAtGrad": 0.509,
     "Employed3Mo": 0.758,
     "AvgSalaryBonus": 165816.0,
+    "SalaryByProfession": 0.9855652538026053,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.314,
     "PeerScore": 3.9,
     "RecruiterScore": 3.6,
-    "GMAT_Combined": 88.0952380952381
+    "GMAT_Combined": 85.05341375676755
   },
   {
     "School": "University of Tennessee--Knoxville",
@@ -1449,11 +1560,12 @@
     "EmployedAtGrad": 0.583,
     "Employed3Mo": 0.833,
     "AvgSalaryBonus": 121961.0,
+    "SalaryByProfession": 0.816538104246991,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.374,
     "PeerScore": 3.3,
     "RecruiterScore": 3.1,
-    "GMAT_Combined": 59.1083974573436
+    "GMAT_Combined": 41.51435299394483
   },
   {
     "School": "The University of Texas at Dallas",
@@ -1462,11 +1574,12 @@
     "EmployedAtGrad": 0.787,
     "Employed3Mo": 0.936,
     "AvgSalaryBonus": 132733.0,
+    "SalaryByProfession": 0.8351253431790009,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.355,
     "PeerScore": 3.1,
     "RecruiterScore": 4.3,
-    "GMAT_Combined": 74.81215846994537
+    "GMAT_Combined": 51.807458143074584
   },
   {
     "School": "University of Utah",
@@ -1475,11 +1588,12 @@
     "EmployedAtGrad": 0.596,
     "Employed3Mo": 0.923,
     "AvgSalaryBonus": 114027.0,
+    "SalaryByProfession": 0.7372726965826133,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.777,
     "PeerScore": 3.3,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 58.63066538090646
+    "GMAT_Combined": 39.769579064502516
   },
   {
     "School": "University of Virginia",
@@ -1488,11 +1602,12 @@
     "EmployedAtGrad": 0.801,
     "Employed3Mo": 0.897,
     "AvgSalaryBonus": 194375.0,
+    "SalaryByProfession": 1.0529057090932876,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.307,
     "PeerScore": 4.1,
     "RecruiterScore": 4.0,
-    "GMAT_Combined": 87.93260473588343
+    "GMAT_Combined": 73.40350257302313
   },
   {
     "School": "University of Washington",
@@ -1501,11 +1616,12 @@
     "EmployedAtGrad": 0.704,
     "Employed3Mo": 0.833,
     "AvgSalaryBonus": 178088.0,
+    "SalaryByProfession": 0.9935434457198421,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.336,
     "PeerScore": 3.7,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 82.65746333045729
+    "GMAT_Combined": 69.06586765370005
   },
   {
     "School": "University of Wisconsin--Madison",
@@ -1514,11 +1630,12 @@
     "EmployedAtGrad": 0.492,
     "Employed3Mo": 0.711,
     "AvgSalaryBonus": 127795.0,
+    "SalaryByProfession": 0.7327756226144079,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.502,
     "PeerScore": 3.6,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 53.36834016393443
+    "GMAT_Combined": 31.499952144929317
   },
   {
     "School": "Vanderbilt University",
@@ -1527,11 +1644,12 @@
     "EmployedAtGrad": 0.785,
     "Employed3Mo": 0.879,
     "AvgSalaryBonus": 180909.0,
+    "SalaryByProfession": 1.0142830010185457,
     "MedianGPA": 3.5,
     "AcceptanceRate": 0.362,
     "PeerScore": 3.8,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 79.7304806890803
+    "GMAT_Combined": 69.2686815974487
   },
   {
     "School": "Washington University in St. Louis",
@@ -1540,11 +1658,12 @@
     "EmployedAtGrad": 0.585,
     "Employed3Mo": 0.763,
     "AvgSalaryBonus": 146604.0,
+    "SalaryByProfession": 0.8221621848680085,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.178,
     "PeerScore": 3.7,
     "RecruiterScore": 3.5,
-    "GMAT_Combined": 93.86416861826699
+    "GMAT_Combined": 87.74675992630984
   },
   {
     "School": "West Texas A&M University",
@@ -1553,11 +1672,12 @@
     "EmployedAtGrad": 0.68,
     "Employed3Mo": 0.92,
     "AvgSalaryBonus": 82429.0,
+    "SalaryByProfession": 0.6042464934331964,
     "MedianGPA": 3.6,
     "AcceptanceRate": 0.763,
     "PeerScore": 1.8,
     "RecruiterScore": 2.4,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 37.70981536984501
   },
   {
     "School": "Willamette University",
@@ -1566,11 +1686,12 @@
     "EmployedAtGrad": 0.463,
     "Employed3Mo": 0.597,
     "AvgSalaryBonus": 61896.0,
+    "SalaryByProfession": 0.461360085432163,
     "MedianGPA": 3.4,
     "AcceptanceRate": 0.968,
     "PeerScore": 2.1,
     "RecruiterScore": 3.5,
-    "GMAT_Combined": 51.45533623285381
+    "GMAT_Combined": 15.780746966397038
   },
   {
     "School": "Yale University",
@@ -1579,10 +1700,11 @@
     "EmployedAtGrad": 0.669,
     "Employed3Mo": 0.806,
     "AvgSalaryBonus": 183446.0,
+    "SalaryByProfession": 1.0246620838979605,
     "MedianGPA": 3.7,
     "AcceptanceRate": 0.285,
     "PeerScore": 4.4,
     "RecruiterScore": 4.2,
-    "GMAT_Combined": 95.7277694982613
+    "GMAT_Combined": 88.53135258957177
   }
 ]

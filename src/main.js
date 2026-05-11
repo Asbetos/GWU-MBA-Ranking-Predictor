@@ -1,9 +1,11 @@
 /**
- * GWU MBA Ranking Predictor — Main Application
- * Bootstraps all three tabs and wires them up.
+ * GWSB Ranking Predictor — Main Application bootstrap.
  */
 
-import { loadModel, simulateRank, getGWUSchoolName, getGWUCurrentRank, getGWUCurrentScore } from './model.js';
+import {
+  loadModel, simulateRank,
+  getGWUSchoolName, getGWUCurrentRank, getGWUCurrentScore,
+} from './model.js';
 import { initSliders, resetSliders } from './sliders.js';
 import { updateResults, showCurrentInfo } from './results.js';
 import { loadCfmArtifacts } from './cfm-models.js';
@@ -16,33 +18,29 @@ async function init() {
   try {
     console.log('[init] Loading model artifacts...');
     await Promise.all([loadModel(), loadCfmArtifacts()]);
-    console.log('[init] Model + CFM artifacts loaded.');
+    console.log('[init] Artifacts loaded.');
 
-    // Tab nav first so panes show/hide correctly.
-    // Register lazy-init handlers BEFORE initTabs so the initial activation
-    // event fires through them.
+    // Lazy-init handlers BEFORE initTabs so the initial activation event fires through.
     initScoreModelTab();
     initTabs();
 
-    // ----- Tab 1 (Direct Predictor) -----
-    const schoolName = getGWUSchoolName();
-    showCurrentInfo(schoolName, getGWUCurrentRank(), getGWUCurrentScore());
-
-    const initialValues = initSliders('sliders-container', handleSliderChange);
-    if (initialValues) handleSliderChange(initialValues);
+    // Direct Predictor
+    showCurrentInfo(getGWUSchoolName(), getGWUCurrentRank(), getGWUCurrentScore());
+    const initial = initSliders('sliders-container', handleSliderChange);
+    if (initial) handleSliderChange(initial);
 
     const resetBtn = document.getElementById('reset-btn');
     if (resetBtn) resetBtn.addEventListener('click', resetSliders);
 
-    // ----- Tab 2 (Performance) -----
+    // Indirect Model Insights (CFM cards)
     renderExplainability();
 
-    // ----- Tab 3 (Lever Predictor) -----
+    // Lever Predictor
     initLeverPredictor();
 
     console.log('[init] App ready.');
   } catch (err) {
-    console.error('[init] Failed to initialize:', err);
+    console.error('[init] Failed:', err);
     showError(err.message);
   }
 }
@@ -58,15 +56,9 @@ function handleSliderChange(values) {
 
 function showError(message) {
   const rankEl = document.getElementById('rank-display');
-  if (rankEl) {
-    rankEl.textContent = '⚠';
-    rankEl.style.fontSize = '4rem';
-  }
+  if (rankEl) { rankEl.textContent = '⚠'; rankEl.style.fontSize = '4rem'; }
   const subtitle = document.getElementById('rank-subtitle');
-  if (subtitle) {
-    subtitle.textContent = `Error: ${message}`;
-    subtitle.style.color = '#ef4444';
-  }
+  if (subtitle) { subtitle.textContent = `Error: ${message}`; subtitle.style.color = '#ef4444'; }
 }
 
 init();

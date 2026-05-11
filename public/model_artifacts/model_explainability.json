@@ -1,145 +1,162 @@
 {
-  "performance": {
-    "mae": 4.177903768623627,
-    "rmse": 5.11250902399797,
-    "r2": 0.9411867760174711,
-    "spearman": 0.9782346589195322,
-    "n_observations": 243,
-    "n_bootstrap_iterations": 10000,
-    "training_years": [
-      2024,
-      2025
-    ]
+  "regression": {
+    "coefficients": [
+      {
+        "feature": "EmployedAtGrad",
+        "mean_weight": 1.5285698705868958,
+        "lower_95_ci": 0.5743170733792873,
+        "upper_95_ci": 2.4135919056631323,
+        "is_significant": true
+      },
+      {
+        "feature": "Employed3Mo",
+        "mean_weight": 2.58454276953597,
+        "lower_95_ci": 1.717365763492344,
+        "upper_95_ci": 3.5265246824545655,
+        "is_significant": true
+      },
+      {
+        "feature": "AvgSalaryBonus",
+        "mean_weight": 7.29251802654172,
+        "lower_95_ci": 5.3288675789293825,
+        "upper_95_ci": 9.727292524011574,
+        "is_significant": true
+      },
+      {
+        "feature": "SalaryByProfession",
+        "mean_weight": 2.8811480102647264,
+        "lower_95_ci": 0.6515539447276767,
+        "upper_95_ci": 4.869294235129046,
+        "is_significant": true
+      },
+      {
+        "feature": "MedianGPA",
+        "mean_weight": 3.1199462580842456,
+        "lower_95_ci": 2.5295823226614464,
+        "upper_95_ci": 3.7432595972865053,
+        "is_significant": true
+      },
+      {
+        "feature": "AcceptanceRate",
+        "mean_weight": -0.9119440090447062,
+        "lower_95_ci": -1.6145242993290834,
+        "upper_95_ci": -0.15931644243140575,
+        "is_significant": true
+      },
+      {
+        "feature": "PeerScore",
+        "mean_weight": 6.95504831314216,
+        "lower_95_ci": 5.799737252052038,
+        "upper_95_ci": 8.161454967861685,
+        "is_significant": true
+      },
+      {
+        "feature": "RecruiterScore",
+        "mean_weight": 3.2067524129888896,
+        "lower_95_ci": 2.405488369890705,
+        "upper_95_ci": 3.932442329757865,
+        "is_significant": true
+      },
+      {
+        "feature": "GMAT_Combined",
+        "mean_weight": 0.03467792884641115,
+        "lower_95_ci": 0.0,
+        "upper_95_ci": 0.38497254723790986,
+        "is_significant": false
+      }
+    ],
+    "intercept": 55.48181011332782,
+    "avg_abs_contribution_pct": [
+      {
+        "feature": "EmployedAtGrad",
+        "pct": 5.404298643568689
+      },
+      {
+        "feature": "Employed3Mo",
+        "pct": 8.930403552629707
+      },
+      {
+        "feature": "AvgSalaryBonus",
+        "pct": 26.954306017607248
+      },
+      {
+        "feature": "SalaryByProfession",
+        "pct": 10.496639095769742
+      },
+      {
+        "feature": "MedianGPA",
+        "pct": 10.86063468618703
+      },
+      {
+        "feature": "AcceptanceRate",
+        "pct": 3.1446562685475667
+      },
+      {
+        "feature": "PeerScore",
+        "pct": 23.53614226591026
+      },
+      {
+        "feature": "RecruiterScore",
+        "pct": 10.554333391312735
+      },
+      {
+        "feature": "GMAT_Combined",
+        "pct": 0.11858607846702292
+      }
+    ],
+    "gwu_contribution_pct": [
+      {
+        "feature": "EmployedAtGrad",
+        "signed_pct": -11.16301599042223
+      },
+      {
+        "feature": "Employed3Mo",
+        "signed_pct": -24.259587905648527
+      },
+      {
+        "feature": "AvgSalaryBonus",
+        "signed_pct": 14.378409919706932
+      },
+      {
+        "feature": "SalaryByProfession",
+        "signed_pct": -6.252849999902497
+      },
+      {
+        "feature": "MedianGPA",
+        "signed_pct": -35.987522519407975
+      },
+      {
+        "feature": "AcceptanceRate",
+        "signed_pct": 6.450456232949439
+      },
+      {
+        "feature": "PeerScore",
+        "signed_pct": 0.7984206796996913
+      },
+      {
+        "feature": "RecruiterScore",
+        "signed_pct": 0.5226627909601395
+      },
+      {
+        "feature": "GMAT_Combined",
+        "signed_pct": -0.18707396130257686
+      }
+    ],
+    "performance": {
+      "mae": 3.0792989071514625,
+      "rmse": 4.008073886300967,
+      "r2": 0.9638525014064023,
+      "spearman": 0.9796069139676699,
+      "n_observations": 243,
+      "n_bootstrap_iterations": 10000,
+      "training_years": [
+        2024,
+        2025
+      ]
+    }
   },
-  "intercept": 57.63442494286373,
-  "coefficients": [
-    {
-      "feature": "AvgSalaryBonus",
-      "mean_weight": 9.668847872598871,
-      "lower_95_ci": 8.217190121730312,
-      "upper_95_ci": 11.180527610648518,
-      "is_significant": true
-    },
-    {
-      "feature": "PeerScore",
-      "mean_weight": 6.552886409009094,
-      "lower_95_ci": 5.319020305610384,
-      "upper_95_ci": 7.8035782562554,
-      "is_significant": true
-    },
-    {
-      "feature": "MedianGPA",
-      "mean_weight": 3.2888713663030633,
-      "lower_95_ci": 2.7162956896547055,
-      "upper_95_ci": 3.8778295376177256,
-      "is_significant": true
-    },
-    {
-      "feature": "RecruiterScore",
-      "mean_weight": 2.99847105160599,
-      "lower_95_ci": 2.1448105529647816,
-      "upper_95_ci": 3.748039075516555,
-      "is_significant": true
-    },
-    {
-      "feature": "Employed3Mo",
-      "mean_weight": 2.615491890046559,
-      "lower_95_ci": 1.7413089508657753,
-      "upper_95_ci": 3.569387884793232,
-      "is_significant": true
-    },
-    {
-      "feature": "EmployedAtGrad",
-      "mean_weight": 1.34348743125799,
-      "lower_95_ci": 0.37616192436845264,
-      "upper_95_ci": 2.229467134873106,
-      "is_significant": true
-    },
-    {
-      "feature": "GMAT_Combined",
-      "mean_weight": 1.2962452390339034,
-      "lower_95_ci": 0.4472130971877208,
-      "upper_95_ci": 2.1309380683613313,
-      "is_significant": true
-    },
-    {
-      "feature": "AcceptanceRate",
-      "mean_weight": -0.9723061516473909,
-      "lower_95_ci": -1.7150282958388878,
-      "upper_95_ci": -0.15864982453453005,
-      "is_significant": true
-    }
-  ],
-  "avg_abs_contribution_pct": [
-    {
-      "feature": "EmployedAtGrad",
-      "pct": 4.718150281259089
-    },
-    {
-      "feature": "Employed3Mo",
-      "pct": 8.974864655512208
-    },
-    {
-      "feature": "AvgSalaryBonus",
-      "pct": 35.511474816531276
-    },
-    {
-      "feature": "MedianGPA",
-      "pct": 11.360930837767826
-    },
-    {
-      "feature": "AcceptanceRate",
-      "pct": 3.3309990939087486
-    },
-    {
-      "feature": "PeerScore",
-      "pct": 22.033152800374765
-    },
-    {
-      "feature": "RecruiterScore",
-      "pct": 9.806256654743242
-    },
-    {
-      "feature": "GMAT_Combined",
-      "pct": 4.264170859902851
-    }
-  ],
-  "gwu_contribution_pct": [
-    {
-      "feature": "EmployedAtGrad",
-      "signed_pct": -8.9615311324333
-    },
-    {
-      "feature": "Employed3Mo",
-      "signed_pct": -22.420970276859766
-    },
-    {
-      "feature": "AvgSalaryBonus",
-      "signed_pct": 17.342898474603345
-    },
-    {
-      "feature": "MedianGPA",
-      "signed_pct": -34.706429921602115
-    },
-    {
-      "feature": "AcceptanceRate",
-      "signed_pct": 6.254901874508345
-    },
-    {
-      "feature": "PeerScore",
-      "signed_pct": 0.6404003291837799
-    },
-    {
-      "feature": "RecruiterScore",
-      "signed_pct": 0.45793006868508357
-    },
-    {
-      "feature": "GMAT_Combined",
-      "signed_pct": -9.21493792212427
-    }
-  ],
   "methodology": {
-    "gmat_blend": "GMAT_Combined is computed per-school as a 0-100 blended percentile score: (1) per-year percentile rank for each of GMAT_old, GMAT_new, GRE_total; (2) weighted average using each school's submission percentages; (3) penalty multiplier of min(1, total_submission/0.25) when total submission < 25%; (4) z-score standardization in the model pipeline.",
-    "training": "Bootstrapped ElasticNetCV over 10000 resamples on 243 observations from [2024, 2025]."
+    "regression": "Bootstrapped ElasticNetCV (10000 iterations) over the 9 features on stacked 2024+2025 data (~243 observations). Includes log/logit transforms and outlier capping (excluding GMAT_Combined and SalaryByProfession, which are already on bounded scales). Calibrated so the rank-1 school = 100.",
+    "gmat_blend": "Per-year percentile rank for GMAT_old, GMAT_new, GRE_Q, GRE_V, GRE_AW. GRE-internal: 0.4*Q + 0.4*V + 0.2*AW. Cross-exam blend weighted by submission proportions (renormalised). Median GRE Q/V/AW approximated from 10th-90th range midpoints. No-input fallback: per-year cohort floor."
   }
 }

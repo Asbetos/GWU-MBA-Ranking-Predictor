@@ -255,6 +255,63 @@
   height: 220px;
 }
 
+/* ---- Inline feature-contribution bars ---- */
+.contrib-section {
+  margin-top: 0.25rem;
+}
+
+.contrib-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.contrib-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(80px, 1.2fr) 3.2rem;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.contrib-label {
+  font-size: 0.68rem;
+  color: #cbd5e1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.contrib-bar-track {
+  height: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.contrib-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.contrib-bar--pos {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.55), rgba(6, 182, 212, 0.65));
+}
+
+.contrib-bar--neg {
+  background: linear-gradient(90deg, rgba(244, 114, 182, 0.5), rgba(244, 63, 94, 0.6));
+}
+
+.contrib-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-align: right;
+  white-space: nowrap;
+}
+
 .confidence-copy {
   font-size: 0.7rem;
   color: #94a3b8;
@@ -268,15 +325,27 @@
 /* ================================================================ */
 /* Tab 3 — Lever predictor                                          */
 /* ================================================================ */
+/* Compact lever card — tight padding so 4 fit per row at xl */
 .lever-slider {
-  padding: 1rem;
+  padding: 0.55rem 0.75rem;
+}
+.lever-slider label { font-size: 0.7rem; }
+.lever-slider [data-role="value"] {
+  font-size: 0.68rem;
+  padding: 0.1rem 0.45rem;
+}
+.lever-slider input[type="range"] {
+  height: 6px;
+}
+.lever-slider input[type="range"]::-webkit-slider-thumb {
+  width: 22px; height: 14px; margin-top: -4px;
 }
 
 .core-feature-row {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.75rem;
-  padding: 0.75rem 1rem;
+  border-radius: 0.6rem;
+  padding: 0.5rem 0.65rem;
   transition: background 0.2s ease;
 }
 
@@ -346,4 +415,132 @@
   background: rgba(99, 102, 241, 0.18);
   color: #e0e7ff;
 }
+
+/* Engine selector (Direct Predictor) */
+.engine-btn {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.engine-btn:hover {
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.engine-btn.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.45), rgba(6, 182, 212, 0.35));
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 4px 12px -4px rgba(99, 102, 241, 0.5);
+}
+
+/* Comparison-tab sort buttons */
+.cmp-sort-btn {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.4rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cmp-sort-btn:hover {
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cmp-sort-btn.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(6, 182, 212, 0.3));
+  border-color: rgba(99, 102, 241, 0.45);
+}
+
+/* Results bar (no longer sticky — scrolls with page) */
+
+/* SBP composite — salary value field on the LEFT */
+.sbp-row {
+  display: grid;
+  grid-template-columns: 6rem 1fr 3rem;
+  gap: 0.5rem;
+  align-items: center;
+}
+.sbp-salary-input {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(99,102,241,0.3);
+  color: #a5b4fc;
+  border-radius: 0.4rem;
+  padding: 0.3rem 0.45rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  text-align: right;
+  width: 100%;
+}
+.sbp-salary-input:focus {
+  outline: none;
+  border-color: rgba(99,102,241,0.6);
+  background: rgba(99,102,241,0.08);
+}
+
+/* GMAT/GRE switch (visual two-state toggle) */
+.toggle-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+.toggle-switch input { position: absolute; opacity: 0; pointer-events: none; }
+.toggle-switch-track {
+  position: relative;
+  width: 2.4rem; height: 1.2rem;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 9999px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.toggle-switch-knob {
+  position: absolute; top: 1px; left: 1px;
+  width: 1rem; height: 1rem;
+  background: #94a3b8;
+  border-radius: 9999px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.toggle-switch input:checked + .toggle-switch-track {
+  background: linear-gradient(135deg, rgba(99,102,241,0.45), rgba(6,182,212,0.35));
+  border-color: rgba(99,102,241,0.5);
+}
+.toggle-switch input:checked + .toggle-switch-track .toggle-switch-knob {
+  transform: translateX(1.2rem);
+  background: #fff;
+}
+
+/* Lever-tinted slider containers (Lever Predictor tab) */
+.lever-slider.tone-high {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.45) !important;
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.12);
+}
+.lever-slider.tone-medium {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.12);
+}
+.lever-slider.tone-low {
+  background-color: rgba(244, 63, 94, 0.10) !important;
+  border-color: rgba(244, 63, 94, 0.40) !important;
+  box-shadow: inset 0 0 0 1px rgba(244, 63, 94, 0.10);
+}
+
+
 

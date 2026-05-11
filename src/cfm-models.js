@@ -78,3 +78,38 @@ export function predictAllCoreFeatures(predictorRow) {
   }
   return out;
 }
+
+let _primaryTargetCache = null;
+export function getLeverPrimaryTargets() {
+  if (_primaryTargetCache) return _primaryTargetCache;
+  const out = {};
+  for (const m of (summary?.lever_metadata || [])) {
+    let best = null;
+    for (const target of TARGET_NAMES) {
+      const model = models[target];
+      if (!model) continue;
+      const idx = model.feature_columns.indexOf(m.key);
+      if (idx < 0) continue;
+      const coef = model.coef[idx];
+      const abs = Math.abs(coef);
+      if (!best || abs > best.absCoef) best = { target, coef, absCoef: abs };
+    }
+    out[m.key] = best || { target: 'unranked', coef: 0, absCoef: 0 };
+  }
+  _primaryTargetCache = out;
+  return out;
+}
+
+export function getCfmTopFeatures(target, k = 8) {
+  const m = models[target];
+  if (!m) return [];
+  const feats = m.feature_columns;
+  const coefs = m.coef;
+  const totalAbs = coefs.reduce((s, c) => s + Math.abs(c), 0);
+  if (totalAbs <= 0) return [];
+  return feats.map((f, i) => ({
+    feature: f,
+    coefficient: coefs[i],
+    pct: (Math.abs(coefs[i]) / totalAbs) * 100,
+  })).sort((a, b) => b.pct - a.pct).slice(0, k);
+}

@@ -1,350 +1,172 @@
-# GWU MBA Ranking Predictor
+# GWU MBA Ranking Predictor v2
 
-An interactive what-if scenario planning tool for predicting George Washington University's US News MBA ranking. Move 8 slider levers to simulate how changes in key metrics affect the predicted ranking in real time.
+A faithful reproduction of the **official US News Best Business Schools 2026 methodology** running side-by-side with a 9-feature bootstrapped regression, with Monte Carlo rank simulation and a methodology-comparison tab.
 
----
-
-## Table of Contents
-
-- [Quick Start](#quick-start)
-- [How the Model Works](#how-the-model-works)
-- [Architecture](#architecture)
-- [File Structure](#file-structure)
-- [Re-training the Model](#re-training-the-model)
-- [Deploying to Vercel](#deploying-to-vercel)
+> **Why v2?** v1 used a single ML regression with 8 features and a hand-rolled GMAT/GRE blend that introduced a non-canonical "<25% submission penalty" not present in the official US News methodology. v2 (a) implements the official 9-indicator z-score+fixed-weights formula, (b) adds the missing **Salary by Profession** indicator (10% of the published score), (c) corrects the GMAT/GRE blend to the published 40/40/20 GRE-internal split with submission-proportion cross-exam blending, (d) keeps the regression on board for comparison, and (e) lets the user toggle between engines on the Direct Predictor tab.
 
 ---
-
-## Webapp Tabs
-
-| # | Tab | What it shows |
-|---|---|---|
-| 1 | **Direct Predictor** | 8 sliders for the core US News features (employment, salary, GPA, acceptance, peer/recruiter scores, GMAT/GRE blend). The GMAT control toggles between Old (200–800) and New (205–805) GMAT scales and lets you optionally include a GRE total score. |
-| 2 | **Lever Models** | Reliability of each of the 8 indirect "core feature" models (independent ML pipelines that predict each US News feature from non-methodological levers). |
-| 3 | **Lever Predictor** | What-if planning at the lever level — adjust non-method inputs (tuition, demographics, work experience, etc.) and see the predicted core features and final rank. |
-| 4 | **Score Model Insights** | Performance metrics (MAE, RMSE, R², Spearman ρ), the bootstrapped coefficient table with 95% CIs and significance, and per-feature percentage contribution to the predicted score (averaged across all schools or for GWU specifically). |
 
 ## Quick Start
 
-### Prerequisites
-
-- **Node.js** v18+ ([download](https://nodejs.org/))
-- **Python** 3.10+ (only needed if re-training the model)
-
-### Step-by-Step Launch
-
 ```bash
-# 1. Navigate to the webapp directory
-cd notebooks/webapp
-
-# 2. Install JavaScript dependencies
+cd webapp-v2
 npm install
-
-# 3. Start the development server
 npm run dev
-
-# 4. Open the app in your browser
-#    → http://localhost:3000/
-```
-
-That's it. The app loads pre-trained model artifacts from `public/model_artifacts/` and runs all predictions client-side in the browser — no backend server needed.
-
-### Other Commands
-
-```bash
-# Build for production (outputs to dist/)
-npm run build
-
-# Preview the production build locally
-npm run preview
+# → http://localhost:3100/
 ```
 
 ---
 
-## How the Model Works
+## What's new in v2
 
-### Overview
-
-The model predicts US News MBA ranking scores using 8 input features, trained on the **2024 + 2025** US News datasets (~243 school-year observations). A Monte Carlo simulation then converts the predicted score into a rank distribution by simulating market volatility across all competing schools.
-
-### Data Preprocessing Pipeline
-
-The raw CSV data (`data/us_news_data_2025.csv`) goes through the following steps, replicating the logic from `[NEW]us_news_model_script_v2.ipynb`:
-
-**1. Column Renaming**
-
-Raw column names from the CSV are mapped to clean model names:
-
-| Raw CSV Column | Model Name |
+| Change | Detail |
 |---|---|
-| `school_info.school_name` | `School` |
-| `school_info.us_news_rank` | `Rank` |
-| `school_info.us_news_overall_score` | `OverallScore` |
-| `ranking_scores_two_year_averages.fulltime_employed_at_graduation_two_yr_avg` | `EmployedAtGrad` |
-| `ranking_scores_two_year_averages.fulltime_employed_3_months_after_two_yr_avg` | `Employed3Mo` |
-| `ranking_scores_two_year_averages.avg_starting_salary_and_bonus_two_yr_avg` | `AvgSalaryBonus` |
-| `ranking_scores_two_year_averages.median_undergraduate_gpa` | `MedianGPA` |
-| `ranking_scores_two_year_averages.acceptance_rate` | `AcceptanceRate` |
-| `ranking_scores_two_year_averages.peer_assessment_score_out_of_5` | `PeerScore` |
-| `ranking_scores_two_year_averages.recruiter_assessment_score_out_of_5` | `RecruiterScore` |
-| `ranking_scores_two_year_averages.median_gmat_score_fulltime_old` | `GMAT_Old` |
-| `ranking_scores_two_year_averages.median_gmat_score_fulltime_new` | `GMAT_New` |
+| **9 indicators** (vs. 8 in v1) | Adds `SalaryByProfession` (per-occupation salary ratio) — 10% of the official score. |
+| **Two scoring engines** | (a) Official US News calculator: z-score + fixed weights + min-max rescale. (b) Bootstrapped ElasticNet regression on stacked 2024+2025. |
+| **Engine toggle** | On the Direct Predictor tab, switch which engine drives the rank prediction. Both share the same Monte Carlo volatility model. |
+| **Corrected GMAT/GRE blend** | Per-year percentile rank for `GMAT_old`, `GMAT_new`, `GRE_Q`, `GRE_V`, `GRE_AW`. GRE-internal 40/40/20. Cross-exam submission-proportion weighted. **No spurious <25% penalty** (that was a v1 bug). |
+| **GRE input** | Slider exposes `GRE Quantitative`, `GRE Verbal`, `GRE Analytical Writing` separately when GRE is enabled. Median GRE is approximated as the midpoint of each section's reported 10th-90th range (the dataset does not carry true medians). |
+| **5th tab — Methodology Comparison** | Per-school side-by-side: published US News rank/score vs. our official reproduction vs. the regression. Sortable, searchable, with summary correlation and mean-error stats. |
+| **Score Model Insights tab** | Now dual-engine: official weights table (with direction higher↑/lower↑) alongside regression coefficients with bootstrap 95% CIs. |
+| **Same Tailwind theme** | Identical glass panels, indigo/cyan palette, Inter + JetBrains Mono fonts. |
 
-**2. Unused Columns Dropped**
+---
 
-- `school_info.us_news_rank_out_of` — constant value, not predictive
-- `ranking_scores_two_year_averages.salaries_by_profession_indicator_rank` — excluded from the 8-feature model
+## Tabs
 
-**3. GMAT/GRE Blended Percentile (US-News-style)**
-
-The naive `fillna()` approach has been replaced with the actual US News methodology:
-
-1. **Per-year percentile ranks** for each test (`GMAT_Old`, `GMAT_New`, `GRE_Total`) computed within each year's cohort.
-2. **Submission-weighted blend** — for each school, the blended percentile is:
-   ```
-   blended = (pct_old·rank_old + pct_new·rank_new + pct_gre·rank_gre) / (pct_old + pct_new + pct_gre)
-   ```
-3. **Threshold penalty** — if a school's total submission percentage across the three tests is below 25%, the blended score is multiplied by `min(1, total_submission/0.25)` to discount low-coverage schools.
-4. **z-score standardization** — the resulting 0-100 blended score replaces `GMAT_Combined` and is centered/scaled by the pipeline's `StandardScaler`.
-
-For schools with no submission data at all, the per-year median blended score is used as fallback.
-
-The GRE total per school is derived from `gre_data.gre_score_range_10th_90th` by parsing the verbal and quantitative ranges and summing their midpoints (out of ~340).
-
-**4. KNN Imputation**
-
-Missing values are imputed using scikit-learn's `KNNImputer` with `n_neighbors=5` and `weights='distance'`. In the 2025 dataset, the affected columns were:
-
-| Column | Missing Count | Missing % |
+| # | Tab | Purpose |
 |---|---|---|
-| `GMAT_Combined` | 65 | 53.3% |
-| `RecruiterScore` | 3 | 2.5% |
-| `MedianGPA` | 2 | 1.6% |
+| 1 | **Direct Predictor** | 9 sliders. Toggle between the official engine and the regression. Monte Carlo simulates 10,000 rank outcomes per slider change. |
+| 2 | **Lever Models** | Reliability of the 8 indirect "core feature" models (CFM artifacts copied from v1; SalaryByProfession is not yet a CFM target). |
+| 3 | **Lever Predictor** | Adjust non-method levers; see predicted core features feed into the chosen score engine. |
+| 4 | **Score Model Insights** | Official methodology weights and direction vs. regression mean coefficients with bootstrap 95% CIs. Per-feature contribution charts (avg or GWU; either engine). |
+| 5 | **Methodology Comparison** | Per-school deltas: Published vs. Official vs. Regression. Sort by absolute disagreement to find where the engines diverge. |
 
-### Model Training Pipeline
+---
 
-After preprocessing, the data is fed into the `USNewsRankingSystem` class, which implements a 3-stage sklearn Pipeline followed by bootstrapped regression:
+## Official methodology reproduced
 
-**Stage 1: OutlierCapper**
+Source: <https://www.usnews.com/education/best-graduate-schools/articles/business-schools-methodology>
 
-Clips each feature to its 5th and 95th percentile bounds learned from the training data. This prevents extreme outliers from distorting the regression.
-
-**Stage 2: RankingFeatureTransformer**
-
-Applies domain-specific transformations to normalize feature distributions:
-
-| Transform | Applied To | Formula | Rationale |
-|---|---|---|---|
-| **Log** | `AvgSalaryBonus`, `GMAT_Combined` | `log(1 + x)` | Compresses right-skewed salary/score distributions |
-| **Logit** | `EmployedAtGrad`, `Employed3Mo`, `AcceptanceRate` | `log(p / (1-p))` | Maps bounded [0,1] percentages to unbounded (-∞, +∞) space |
-| **Inverse Normal** | *(not used in this model)* | `-Φ⁻¹((rank - 0.5) / N)` | Converts ordinal ranks to Z-scores |
-
-**Stage 3: StandardScaler**
-
-Centers and scales each transformed feature to zero mean and unit variance: `z = (x - μ) / σ`
-
-**Stage 4: Bootstrapped ElasticNetCV (1,000 iterations)**
-
-Instead of fitting a single regression, the model bootstraps 1,000 samples and fits `ElasticNetCV` on each:
-
-1. Resample the data with replacement
-2. Fit `ElasticNetCV` with `l1_ratio=[.1, .5, .7, .9, .95, .99, 1]` and 5-fold CV
-3. Collect the coefficient vector from each iteration
-4. Final coefficients = mean of all 1,000 bootstrap coefficient vectors
-
-This produces robust, variance-stabilized weights and enables confidence interval estimation.
-
-**Stage 5: Calibration**
-
-The model is calibrated so that the #1-ranked school (Stanford) receives a predicted score of exactly 100:
-
-```
-intercept = 100 - dot(transform(Stanford_features), coefficients)
-```
-
-### Trained Model Coefficients
-
-After re-training on 2024 + 2025 with the GMAT/GRE blended percentile transformation:
-
-| Feature | Mean Weight | 95% CI | Significant? |
-|---|---|---|---|
-| `AvgSalaryBonus` | 9.67 | [8.22, 11.18] | ✓ |
-| `PeerScore` | 6.55 | [5.32, 7.80] | ✓ |
-| `MedianGPA` | 3.29 | [2.72, 3.88] | ✓ |
-| `RecruiterScore` | 3.00 | [2.14, 3.75] | ✓ |
-| `Employed3Mo` | 2.62 | [1.74, 3.57] | ✓ |
-| `EmployedAtGrad` | 1.34 | [0.38, 2.23] | ✓ |
-| `GMAT_Combined` | 1.30 | [0.45, 2.13] | ✓ |
-| `AcceptanceRate` | -0.97 | [-1.72, -0.16] | ✓ |
-
-**Key insights:**
-- Doubling the training set (and using a more faithful GMAT methodology) tightens every confidence interval; **all 8 features are now significant**, including `GMAT_Combined` which previously crossed zero.
-- Average Salary + Bonus remains the strongest predictor.
-- Acceptance Rate stays negatively signed: lower acceptance → higher score (more selective = better).
-
-The exact coefficients are regenerated each time `train_model.py` runs and exported as `model_explainability.json` (consumed by the Score Model Insights tab in the webapp).
-
-### Model Performance
-
-| Metric | Value |
+| Indicator | Weight |
 |---|---|
-| MAE | 4.18 |
-| RMSE | 5.11 |
-| R² | 0.941 |
-| Spearman ρ | 0.978 |
-| Observations | 243 |
+| Employment rates at graduation (2-yr weighted avg) | 7% |
+| Employment rates 3 months after graduation (2-yr weighted avg) | 13% |
+| Mean starting salary + bonus (2-yr weighted avg) | 20% |
+| **Salary by profession** | 10% |
+| Peer assessment | 12.5% |
+| Recruiter assessment (3-yr weighted avg) | 12.5% |
+| Median GMAT/GRE (40/40/20 GRE blend, submission-weighted across exams) | 13% |
+| Median undergraduate GPA | 10% |
+| Acceptance rate (lower is better) | 2% |
 
-### Monte Carlo Rank Simulation
+Each indicator is z-scored against the cohort, multiplied by its weight (acceptance rate negated), summed, and rescaled so the top school = 100.
 
-The trained model predicts *scores*, not *ranks*. To convert a score into a rank, the app runs a Monte Carlo simulation (adapted from `rank_scenario_planning.ipynb`):
+### Salary by profession
 
-1. **Predict scores** for all 122 schools using the trained pipeline
-2. **Override the target school's score** with the user's what-if scenario (deterministic)
-3. **Add tiered Gaussian noise** to competitor scores (simulating year-to-year volatility):
-   - Top 20 schools: σ = 0.8 (very stable)
-   - Ranks 21-50: σ = 1.5 (moderate volatility)
-   - Ranks 51+: σ = 2.5 (high volatility)
-4. **Rank all schools** by descending score in each simulation
-5. **Repeat 5,000 times** and compile the rank distribution
+For each of 7 professions {Consulting, Finance/Accounting, General Management, Human Resources, Marketing/Sales, IT/MIS, Operations/Logistics}: compute `school_avg_salary / cohort_weighted_avg`. Drop "Other" and any profession with <3 reporting graduates. Each school's score is the weighted average of these ratios across professions, weighted by the school's number of reporters per profession.
 
-The result is a probability distribution of ranks, from which we extract:
-- **Median rank** — the most likely outcome
-- **90% confidence interval** — the range from the 5th to 95th percentile
-- **Rank distribution histogram** — the full probability profile
+### GMAT/GRE blend
 
----
+1. Per-year percentile rank for each of the 5 score distributions: GMAT-old, GMAT-new, GRE Q, GRE V, GRE AW.
+2. GRE-internal blend: `0.4·pct(Q) + 0.4·pct(V) + 0.2·pct(AW)` → single GRE percentile.
+3. Cross-exam blend: weighted by the school's `Pct_GMAT_Old`, `Pct_GMAT_New`, `Pct_GRE` submission proportions, normalised to sum to 1.
+4. Multiply by 100 → 0–100 score.
 
-## Architecture
-
-```
-┌──────────────────────────────────────────────────────────┐
-│  TRAINING (Python, runs once)                            │
-│                                                          │
-│  Raw CSV → Rename → GMAT Combine → KNN Impute           │
-│      ↓                                                   │
-│  OutlierCapper → FeatureTransformer → StandardScaler     │
-│      ↓                                                   │
-│  Bootstrapped ElasticNetCV (1000x) → Calibration         │
-│      ↓                                                   │
-│  Export 7 JSON artifacts                                 │
-└──────────────────────────┬───────────────────────────────┘
-                           │
-                    JSON artifacts
-                           │
-┌──────────────────────────▼───────────────────────────────┐
-│  FRONTEND (JavaScript, runs in browser)                  │
-│                                                          │
-│  Load JSON artifacts → Replicate transform pipeline      │
-│      ↓                                                   │
-│  8 Interactive Sliders → Debounced input (300ms)         │
-│      ↓                                                   │
-│  Client-side Monte Carlo simulation (5000 iterations)    │
-│      ↓                                                   │
-│  Predicted Rank + CI + Distribution Chart                │
-└──────────────────────────────────────────────────────────┘
-```
-
-The key design choice is **"Train in Python, Serve in JavaScript"**: the heavy scikit-learn training runs once offline, exports all learned parameters as JSON, and the browser replicates the lightweight transform + predict + simulate pipeline in pure JavaScript for instant real-time predictions.
+If a percentile is missing for a given exam, that exam contributes zero weight (and the others re-normalise). If all three are missing, the school gets the cohort floor (the lowest blended score among schools that did report).
 
 ---
 
-## File Structure
-
-```
-webapp/
-├── index.html                     # Main HTML page
-├── package.json                   # Node.js dependencies and scripts
-├── vite.config.js                 # Vite bundler configuration
-├── tailwind.config.js             # Tailwind CSS theme and plugins
-├── postcss.config.js              # PostCSS configuration
-├── vercel.json                    # Vercel deployment settings
-├── .gitignore                     # Git ignore rules
-├── README.md                      # This file
-│
-├── styles/
-│   └── index.css                  # Tailwind directives + custom components
-│
-├── src/
-│   ├── main.js                    # Application entry point
-│   ├── model.js                   # Client-side inference engine
-│   ├── sliders.js                 # Slider UI component
-│   └── results.js                 # Results panel + Chart.js visualization
-│
-├── public/
-│   └── model_artifacts/           # Pre-trained model parameters (9 JSON files)
-│       ├── model_config.json      #   Feature list, transform config
-│       ├── capper_bounds.json     #   OutlierCapper percentile bounds
-│       ├── transformer_config.json#   Log/logit/inv_norm column mappings
-│       ├── scaler_params.json     #   StandardScaler mean and scale vectors
-│       ├── model_weights.json     #   Regression coefficients + intercept
-│       ├── data_snapshot.json     #   All schools (most recent year) with imputed features
-│       ├── feature_ranges.json    #   Slider ranges + GWU current values + GMAT input config
-│       ├── gmat_inference_curves.json  #   Sorted GMAT/GRE scores for client-side percentile ranks
-│       └── model_explainability.json   #   Performance metrics + coefficients + contribution %s
-│
-└── scripts/
-    ├── train_model.py             # Full training pipeline (Python)
-    └── requirements.txt           # Python dependencies
-```
-
----
-
-## Re-training the Model
-
-When new ranking data is available:
+## Re-training
 
 ```bash
-# 1. Place the new CSVs at the expected paths
-#    → ../all_schools_flat_2024.csv (relative to webapp/)
-#    → ../all_schools_flat_2025.csv
-
-# 2. Install Python dependencies (one-time)
-cd scripts
-pip install -r requirements.txt
-
-# 3. Run the training script
+cd webapp-v2/scripts
+pip install -r requirements.txt   # one-time
 python train_model.py
-#    → Outputs 9 JSON files to public/model_artifacts/
-
-# 4. The webapp will automatically use the new artifacts on next load
+# → 10 JSON artifacts written to public/model_artifacts/
 ```
 
-The training script takes ~40 seconds on a modern machine (bottlenecked by 1,000 ElasticNetCV bootstrap iterations with 4-core parallelism).
+The script:
+1. Loads `../../all_schools_flat_2024.csv` and `../../all_schools_flat_2025.csv`.
+2. Per-year KNN-imputes the 9 indicators + raw test scores.
+3. Computes the salary-by-profession indicator (per-year cohort means).
+4. Computes the corrected GMAT/GRE blended percentile.
+5. Runs the official z-score + fixed-weight calculator and reports MAE/R²/Spearman vs. the published `OverallScore`.
+6. Trains the bootstrapped ElasticNet (10,000 iterations) and reports the same.
+7. Exports all artifacts including `methodology_comparison.json` for the comparison tab.
 
 ---
 
-## Deploying to Vercel
+## Artifacts
 
-### Steps
+In `public/model_artifacts/`:
 
-1. **Create a GitHub repository** and push the `webapp/` folder contents
-
-2. **Import on Vercel:**
-   - Go to [vercel.com](https://vercel.com) → "Add New Project"
-   - Import your GitHub repository
-   - Vercel auto-detects Vite — no additional configuration needed
-
-3. **Deploy:**
-   - Vercel runs `npx vite build` automatically
-   - Model artifacts from `public/model_artifacts/` are included in the static build
-   - The app is deployed as a fully static site (no server required)
-
-### How It Works in Production
-
-The production build (`dist/`) is a fully self-contained static site:
-- `index.html` + bundled JS/CSS
-- `model_artifacts/` served as static JSON files
-- All predictions run client-side — zero server cost, instant response times
-
----
-
-## Tech Stack
-
-| Layer | Technology |
+| File | Purpose |
 |---|---|
-| Model Training | Python 3.10+, scikit-learn, scipy, numpy, pandas, joblib |
-| Frontend Framework | Vite 8 |
-| Styling | Tailwind CSS v3 |
-| Charts | Chart.js 4 |
-| Inference | Pure JavaScript (browser-side) |
-| Deployment | Vercel (static hosting) |
+| `model_config.json` | 9-feature list, target name, official weights, transform config |
+| `official_params.json` | Cohort means/stds per indicator + min/max weighted-sum for rescaling |
+| `capper_bounds.json` | Outlier caps used by the regression-track only |
+| `transformer_config.json` | log/logit columns for the regression track |
+| `scaler_params.json` | Regression-track StandardScaler mean/scale |
+| `model_weights.json` | Regression coef + intercept |
+| `data_snapshot.json` | All schools (snapshot year) with imputed features + computed `official_score` |
+| `feature_ranges.json` | Slider ranges + GMAT input config + GWU current values |
+| `gmat_inference_curves.json` | Sorted GMAT_old/new + GRE Q/V/AW score arrays for client-side percentile rank |
+| `model_explainability.json` | Performance + coefficients + contribution percentages for both engines |
+| `methodology_comparison.json` | Per-school rows: published / official / regression scores & ranks |
+
+---
+
+## Deploying to Vercel via a separate GitHub repo
+
+This module is **independent** of the original `webapp/` and is designed to deploy to its own Vercel project.
+
+### One-time setup
+
+```bash
+# From inside webapp-v2/
+cd "D:/work/US news/notebooks/webapp-v2"
+
+# Initialise git, commit
+git init
+git add .
+git commit -m "Initial commit: GWU MBA Ranking Predictor v2 (faithful methodology + regression)"
+
+# Create a new GitHub repo (via gh CLI, or manually on github.com)
+gh repo create GWU-MBA-Ranking-Predictor-v2 --public --source=. --remote=origin --push
+# OR manually:
+#   git remote add origin git@github.com:<your-user>/GWU-MBA-Ranking-Predictor-v2.git
+#   git push -u origin main
+```
+
+### Vercel project
+
+1. Go to [vercel.com](https://vercel.com) → "Add New Project".
+2. Import the new GitHub repo.
+3. Vercel auto-detects Vite. No env vars or extra configuration needed.
+4. **Build command**: `npx vite build` (already set in `vercel.json`).
+5. **Output directory**: `dist` (already set).
+6. Click Deploy.
+
+Subsequent pushes to `main` auto-deploy. Treat the v2 Vercel project as a parallel surface; the original webapp continues to deploy independently from its own repo.
+
+---
+
+## Tech stack
+
+| Layer | Same as v1? | Notes |
+|---|---|---|
+| Model training | Python 3.10+, scikit-learn, scipy, numpy, pandas, joblib | Adds the Salary-by-Profession reducer |
+| Frontend bundler | Vite 8 | port 3100 (vs. v1's 3000) for side-by-side dev |
+| Styling | Tailwind CSS v3 with the same custom theme | Identical glass-panel + navy/indigo/cyan palette |
+| Charts | Chart.js 4 | 2 charts (rank distribution, contribution) |
+| Inference | Pure JavaScript (browser-side) | Two engines: official z-score formula and regression coefficient dot-product |
+| Deployment | Vercel static hosting | Independent project, independent GitHub repo |
+
+---
+
+## Known limitations
+
+1. **GRE medians are approximated** as range midpoints — the published dataset does not include true medians per school. For schools with skewed GRE distributions this introduces a small bias.
+2. **Cohort definition** — US News' published z-scores are computed on the 134 schools they actually rank. Our 2024+2025 stack has ~243 rows including some unranked observations; this shifts cohort means/stds slightly. Spearman rank correlation with the published ranking is excellent (~0.96), but the absolute score scale has a ~10-point linear offset.
+3. **CFM models are unchanged from v1** — they predict the legacy 8-feature schema and the legacy raw-GMAT `GMAT_Combined`. Tab 3 (Lever Predictor) adapts the CFM output to v2's blended scale on the fly, but does not re-train CFMs against the new 9-indicator schema. Re-training the CFMs is out of scope for v2.

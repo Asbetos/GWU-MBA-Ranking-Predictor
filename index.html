@@ -4,12 +4,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GWU MBA Ranking Predictor | What-If Scenario Planning</title>
+  <title>GWSB Ranking Predictor</title>
   <meta name="description"
-    content="Interactive what-if scenario planning tool for predicting GWU's US News MBA ranking. Adjust 8 key variables and see real-time ranking predictions." />
-  <meta property="og:title" content="GWU MBA Ranking Predictor" />
+    content="Interactive what-if scenario planning for GWSB's US News MBA ranking. Faithful US News methodology + ML regression with Monte Carlo rank simulation." />
+  <meta property="og:title" content="GWSB Ranking Predictor" />
   <meta property="og:description"
-    content="Predict how changes in key metrics affect GWU's US News MBA ranking using Monte Carlo simulation." />
+    content="Faithful US News methodology + ML regression side-by-side, with what-if rank simulation." />
   <link rel="icon" type="image/svg+xml"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>" />
   <link rel="stylesheet" href="/styles/index.css" />
@@ -28,11 +28,7 @@
   <!-- Header -->
   <header class="pt-4 pb-2 px-6">
     <div class="max-w-7xl mx-auto text-center flex flex-col md:flex-row items-center justify-center gap-4">
-      <h1 class="text-2xl font-black tracking-tight text-white m-0">MBA Ranking Predictor</h1>
-      <div class="hidden md:block h-6 w-px bg-white/20"></div>
-      <p class="text-gray-400 text-sm m-0">
-        Three lenses on <span class="text-indigo-400 font-semibold" id="school-name">GWU's</span> US News MBA standing
-      </p>
+      <h1 class="text-2xl font-black tracking-tight text-white m-0">GWSB Ranking Predictor</h1>
     </div>
 
     <!-- Tab nav -->
@@ -41,14 +37,14 @@
         <button class="tab-btn active" data-tab="direct" role="tab" aria-selected="true">
           <span class="tab-num">1</span> Direct Predictor
         </button>
-        <button class="tab-btn" data-tab="performance" role="tab" aria-selected="false">
-          <span class="tab-num">2</span> Lever Models
-        </button>
         <button class="tab-btn" data-tab="levers" role="tab" aria-selected="false">
-          <span class="tab-num">3</span> Lever Predictor
+          <span class="tab-num">2</span> Indirect Levers Predictor
         </button>
         <button class="tab-btn" data-tab="score-model" role="tab" aria-selected="false">
-          <span class="tab-num">4</span> Score Model Insights
+          <span class="tab-num">3</span> Direct Model Insights
+        </button>
+        <button class="tab-btn" data-tab="performance" role="tab" aria-selected="false">
+          <span class="tab-num">4</span> Indirect Model Insights
         </button>
       </div>
     </nav>
@@ -58,218 +54,238 @@
   <main class="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-6">
 
     <!-- ============================================================ -->
-    <!-- TAB 1: Direct Predictor (existing 8 core feature sliders)    -->
+    <!-- TAB 1: Direct Predictor                                      -->
     <!-- ============================================================ -->
     <section class="tab-pane" id="tab-direct" role="tabpanel">
       <div class="flex flex-col gap-6">
 
-        <!-- Top Row: Results Panel -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- Left: Rank & Info -->
-          <div class="flex flex-col gap-4">
-            <div class="glass-panel p-4 flex flex-col justify-center" id="current-info">
-              <div class="flex items-center gap-2 mb-2">
-                <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
-                <p class="text-gray-400 text-sm">Current Standing</p>
-              </div>
-              <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-white font-semibold" id="current-school-name">George Washington University</p>
-                  <p class="text-gray-500 text-sm" id="current-score-label">Score: —</p>
+        <!-- Sticky results panel — original-size, stays visible while scrolling -->
+        <div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left: Current standing + predicted rank -->
+            <div class="flex flex-col gap-4">
+              <div class="glass-panel p-4 flex flex-col justify-center" id="current-info">
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
+                  <p class="text-gray-400 text-sm">Current Standing</p>
                 </div>
-                <div class="text-right">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-white font-semibold" id="current-school-name">George Washington University</p>
+                    <p class="text-gray-500 text-sm" id="current-score-label">Score: —</p>
+                  </div>
                   <p class="text-3xl font-bold text-indigo-400" id="current-rank">#—</p>
                 </div>
               </div>
-            </div>
-
-            <div class="glass-panel p-6 text-center flex-1 flex flex-col justify-center" id="rank-card">
-              <p class="text-gray-400 text-sm uppercase tracking-widest mb-2">Predicted Rank</p>
-              <div id="rank-display" class="rank-display mb-2">#—</div>
-              <p class="text-gray-500 text-sm" id="rank-subtitle">Move sliders to predict</p>
-            </div>
-          </div>
-
-          <!-- Middle/Right: Stats & Chart -->
-          <div class="lg:col-span-2 flex flex-col gap-4">
-            <div class="grid grid-cols-2 gap-4">
-              <div class="stat-card" id="score-card">
-                <p class="text-gray-400 text-xs uppercase tracking-widest mb-1">Scenario Score</p>
-                <p class="text-3xl font-bold text-white" id="scenario-score">—</p>
-              </div>
-              <div class="stat-card" id="ci-card">
-                <p class="text-gray-400 text-xs uppercase tracking-widest mb-1">90% CI Range</p>
-                <p class="text-3xl font-bold text-white" id="ci-range">—</p>
+              <div class="glass-panel p-6 text-center flex-1 flex flex-col justify-center" id="rank-card">
+                <p class="text-gray-400 text-sm uppercase tracking-widest mb-2">Predicted Rank</p>
+                <div id="rank-display" class="rank-display mb-2">#—</div>
+                <p class="text-gray-500 text-sm" id="rank-subtitle">Move sliders to predict</p>
               </div>
             </div>
-
-            <div class="glass-panel p-4 flex-1">
-              <p class="text-gray-400 text-sm mb-2">Rank Distribution</p>
-              <canvas id="rankChart"></canvas>
+            <!-- Right: Score, CI, distribution chart -->
+            <div class="lg:col-span-2 flex flex-col gap-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="stat-card" id="score-card">
+                  <p class="text-gray-400 text-xs uppercase tracking-widest mb-1">Scenario Score</p>
+                  <p class="text-3xl font-bold text-white" id="scenario-score">—</p>
+                </div>
+                <div class="stat-card" id="ci-card">
+                  <p class="text-gray-400 text-xs uppercase tracking-widest mb-1">90% CI Range</p>
+                  <p class="text-3xl font-bold text-white" id="ci-range">—</p>
+                </div>
+              </div>
+              <div class="glass-panel p-4 flex-1">
+                <p class="text-gray-400 text-sm mb-2">Rank Distribution</p>
+                <canvas id="rankChart"></canvas>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Sliders -->
-        <div class="space-y-4">
-          <h2 class="text-xl font-bold text-white">Input Variables</h2>
-          <div id="sliders-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Sliders injected by JS -->
-          </div>
-          <div class="flex justify-end pt-2">
-            <button id="reset-btn" class="reset-btn">↺ Reset to Current</button>
-          </div>
+        <!-- Sliders (compact) -->
+        <div class="flex items-center justify-between mt-2">
+          <h2 class="text-base font-bold text-white">Input Variables (9)</h2>
+          <button id="reset-btn" class="reset-btn">↺ Reset to Current</button>
         </div>
+        <div id="sliders-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2"></div>
       </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- TAB 2: Model Performance & Explainability                    -->
+    <!-- TAB 2: Lever Models (CFM reliability)                        -->
     <!-- ============================================================ -->
     <section class="tab-pane hidden" id="tab-performance" role="tabpanel">
       <div class="flex flex-col gap-4">
         <div class="glass-panel p-5">
-          <h2 class="text-xl font-bold text-white mb-1">8 Core-Feature Models — Reliability & Levers</h2>
-          <p class="text-gray-400 text-sm">
-            Each card shows how reliably we can predict that ranking input from non-method levers,
-            plus the strongest signed coefficients driving the prediction. Confidence is based on
-            grouped cross-validation R² and a forward-in-time holdout (train on 2024, test on 2025).
+          <h2 class="text-xl font-bold text-white mb-1">How the Indirect Lever Models work</h2>
+          <p class="text-gray-300 text-sm leading-relaxed">
+            Indirect levers — like tuition, work-experience averages, or applicant demographics — aren't ranked by US News directly.
+            Instead, each of the 9 ranking indicators has its own machine-learning model that translates these levers into a
+            predicted indicator value. The Direct Score Model then turns those into a rank.
+          </p>
+          <p class="text-gray-400 text-xs mt-2 leading-relaxed">
+            <strong class="text-white">Each card below = one of those 9 indicator-level models.</strong>
+            The confidence badge tells you how trustworthy that model is — based on how well it predicts schools it was <em>not</em>
+            trained on (cross-validation) <strong>and</strong> on a forward-in-time test (train on 2024, test on 2025).
+            <strong class="text-white">Hover any card</strong> to see which levers drive that indicator and by how much.
           </p>
           <div id="performance-legend" class="flex flex-wrap gap-3 mt-3 text-xs">
-            <span class="confidence-pill confidence-high">High confidence — actionable</span>
-            <span class="confidence-pill confidence-medium">Medium — directional signal</span>
-            <span class="confidence-pill confidence-low">Low — interpret with care</span>
+            <span class="confidence-pill confidence-high">High — trust the direction and rough magnitude</span>
+            <span class="confidence-pill confidence-medium">Medium — direction is reliable, magnitude is rough</span>
+            <span class="confidence-pill confidence-low">Low — noisy signal; treat as suggestive only</span>
           </div>
         </div>
 
-        <div id="performance-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <!-- 8 model cards injected by JS -->
+        <div id="performance-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
+
+        <div class="glass-panel p-4 border-amber-500/30">
+          <p class="text-amber-300 text-xs leading-relaxed">
+            <strong>Reading the card metrics:</strong>
+            <strong class="text-white">CV R²</strong> is how much of the indicator's variation the model can explain on unseen schools
+            (1.00 = perfect, near 0 = no better than the cohort average).
+            <strong class="text-white">Holdout R²</strong> repeats the test forward in time (train 2024, predict 2025).
+            <strong class="text-white">MAE</strong> is the average prediction error in the indicator's own units.
+            <strong class="text-white">Rows</strong> is the training-set size.
+          </p>
         </div>
       </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- TAB 3: Lever Predictor (non-method levers → core → rank)     -->
+    <!-- TAB 3: Lever Predictor                                       -->
     <!-- ============================================================ -->
     <section class="tab-pane hidden" id="tab-levers" role="tabpanel">
-      <div class="flex flex-col gap-6">
+      <div class="flex flex-col gap-5">
 
-        <div class="glass-panel p-5">
-          <h2 class="text-xl font-bold text-white mb-1">From Levers to Rank</h2>
-          <p class="text-gray-400 text-sm">
-            Adjust GWU's non-methodological levers below. Each lever feeds the 8 core-feature models,
-            which then feed the existing OverallScore model and Monte Carlo rank simulator.
-            Watch the <span class="text-indigo-300 font-semibold">predicted core features</span> shift
-            and the <span class="text-indigo-300 font-semibold">final rank</span> update in real time.
-          </p>
-        </div>
-
-        <!-- Predicted Rank + Core Features -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="flex flex-col gap-4">
-            <div class="glass-panel p-4">
-              <div class="flex items-center gap-2 mb-2">
-                <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
-                <p class="text-gray-400 text-sm">Baseline (current GWU)</p>
-              </div>
-              <div class="flex items-center justify-between">
-                <p class="text-white text-sm">Actual rank</p>
-                <p class="text-2xl font-bold text-cyan-300" id="lever-baseline-rank">#—</p>
-              </div>
-              <div class="flex items-center justify-between mt-1">
-                <p class="text-white text-sm">Actual score</p>
-                <p class="text-lg font-semibold text-gray-200" id="lever-baseline-score">—</p>
-              </div>
-            </div>
-
-            <div class="glass-panel p-6 text-center flex-1 flex flex-col justify-center">
-              <p class="text-gray-400 text-sm uppercase tracking-widest mb-2">Lever-Driven Rank</p>
-              <div id="lever-rank-display" class="rank-display mb-2">#—</div>
-              <p class="text-gray-500 text-sm" id="lever-rank-subtitle">Move sliders to predict</p>
-              <div class="grid grid-cols-2 gap-3 mt-4">
-                <div class="bg-white/5 rounded-lg p-3">
-                  <p class="text-[10px] uppercase tracking-widest text-gray-500">Score</p>
-                  <p class="text-lg font-bold text-white" id="lever-score">—</p>
+        <!-- Sticky lever results: lever-driven rank + predicted core features -->
+        <div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <!-- Left: baseline + lever-driven rank -->
+            <div class="flex flex-col gap-3">
+              <div class="glass-panel p-3">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                  <p class="text-gray-400 text-xs uppercase tracking-widest">Baseline (current GWU)</p>
                 </div>
-                <div class="bg-white/5 rounded-lg p-3">
-                  <p class="text-[10px] uppercase tracking-widest text-gray-500">90% CI</p>
-                  <p class="text-lg font-bold text-white" id="lever-ci">—</p>
+                <div class="flex items-center justify-between">
+                  <p class="text-white text-sm">Actual rank</p>
+                  <p class="text-xl font-bold text-cyan-300" id="lever-baseline-rank">#—</p>
+                </div>
+                <div class="flex items-center justify-between mt-0.5">
+                  <p class="text-white text-sm">Actual score</p>
+                  <p class="text-base font-semibold text-gray-200" id="lever-baseline-score">—</p>
+                </div>
+              </div>
+              <div class="glass-panel p-5 text-center flex-1 flex flex-col justify-center">
+                <p class="text-gray-400 text-xs uppercase tracking-widest mb-2">Lever-Driven Rank</p>
+                <div id="lever-rank-display" class="rank-display mb-2">#—</div>
+                <p class="text-gray-500 text-xs" id="lever-rank-subtitle">Move sliders to predict</p>
+                <div class="grid grid-cols-2 gap-2 mt-3">
+                  <div class="bg-white/5 rounded-lg p-2">
+                    <p class="text-[9px] uppercase tracking-widest text-gray-500">Score</p>
+                    <p class="text-base font-bold text-white" id="lever-score">—</p>
+                  </div>
+                  <div class="bg-white/5 rounded-lg p-2">
+                    <p class="text-[9px] uppercase tracking-widest text-gray-500">90% CI</p>
+                    <p class="text-base font-bold text-white" id="lever-ci">—</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div class="lg:col-span-2 glass-panel p-4 flex flex-col">
-            <div class="flex items-baseline justify-between mb-2">
-              <p class="text-gray-300 font-semibold">Predicted Core Features</p>
-              <p class="text-xs text-gray-500">colored by model confidence</p>
-            </div>
-            <div id="lever-core-features" class="grid grid-cols-1 md:grid-cols-2 gap-3 flex-1">
-              <!-- Per-feature rows injected by JS -->
+            <!-- Right: predicted core features -->
+            <div class="lg:col-span-2 glass-panel p-3 flex flex-col">
+              <div class="flex items-baseline justify-between mb-2">
+                <p class="text-gray-300 font-semibold text-sm">Predicted Core Features</p>
+                <p class="text-[10px] text-gray-500">colored by model confidence</p>
+              </div>
+              <div id="lever-core-features" class="grid grid-cols-2 md:grid-cols-4 gap-2 flex-1"></div>
             </div>
           </div>
         </div>
 
-        <!-- Lever sliders -->
-        <div class="space-y-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold text-white">Levers</h2>
-            <button id="lever-reset-btn" class="reset-btn">↺ Reset to GWU current</button>
-          </div>
-          <div id="lever-sliders-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- Lever sliders injected by JS -->
-          </div>
+        <!-- Levers (compact, 4-column wide grid) -->
+        <div class="flex items-center justify-between mt-2">
+          <h2 class="text-base font-bold text-white">Indirect Levers</h2>
+          <button id="lever-reset-btn" class="reset-btn">↺ Reset to GWU current</button>
+        </div>
+        <div id="lever-sliders-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
         </div>
 
-        <div class="glass-panel p-4 border-amber-500/30">
-          <p class="text-amber-300 text-sm">
+        <div class="glass-panel p-3 border-amber-500/30 mt-1">
+          <p class="text-amber-300 text-xs">
             <strong>Caveat:</strong>
             Levers that primarily move <em>low-confidence</em> targets
             (<span class="font-mono">EmployedAtGrad</span>, <span class="font-mono">Employed3Mo</span>)
             are unlikely to translate into real-world rank movement at the precision shown.
-            Treat directional shifts as planning hypotheses, not commitments.
+            Treat directional shifts as planning hypotheses.
           </p>
         </div>
       </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- TAB 4: Score Model Insights (main OverallScore predictor)    -->
+    <!-- TAB 3: Direct Model Insights — regression scoring engine    -->
     <!-- ============================================================ -->
     <section class="tab-pane hidden" id="tab-score-model" role="tabpanel">
       <div class="flex flex-col gap-5">
         <div class="glass-panel p-5">
-          <h2 class="text-xl font-bold text-white mb-1">Score Model — Performance & Explainability</h2>
-          <p class="text-gray-400 text-sm">
-            The bootstrapped ElasticNet regression that predicts each school's US News
-            Overall Score from 8 transformed features. Coefficients are the mean of
-            <span class="text-indigo-300 font-semibold" id="sm-bootstrap-iters">10,000</span>
-            bootstrap resamples; the 95% CI shows their bootstrap distribution.
+          <h2 class="text-xl font-bold text-white mb-1">How the Direct Score Model works</h2>
+          <p class="text-gray-300 text-sm leading-relaxed">
+            This is the engine that converts the 9 ranking indicators on the Direct Predictor tab into a predicted overall score.
+            It's a machine-learning regression trained on two years of US News data
+            (<span id="sm-bootstrap-iters">10,000</span> training rounds, calibrated so the #1 school = score 100).
+          </p>
+          <p class="text-gray-400 text-xs mt-2">
+            Use this tab to see <strong class="text-white">which indicators move the rank the most</strong>,
+            <strong class="text-white">how reliably</strong> the model predicts a school's score, and
+            <strong class="text-white">how confident</strong> we are in each individual weight.
           </p>
         </div>
 
         <!-- Performance metrics -->
-        <div id="score-model-perf" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
+        <div class="glass-panel p-5">
+          <h3 class="text-lg font-semibold text-cyan-300 mb-1">How well does the model match US News?</h3>
+          <p class="text-gray-400 text-xs mb-3">Four ways of measuring accuracy on the same 243 school-year observations.</p>
+          <div id="sm-perf-regression" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
+          <p class="text-[11px] text-gray-500 mt-3 leading-relaxed">
+            <strong class="text-white">MAE</strong> &amp; <strong class="text-white">RMSE</strong> — average score error (lower is better; published scores run 0–100).
+            <strong class="text-white">R²</strong> — share of score variation the model explains (1.00 = perfect).
+            <strong class="text-white">Spearman ρ</strong> — agreement on rank order (1.00 = identical ranking).
+          </p>
+        </div>
 
-        <!-- Coefficients table + contributions chart -->
+        <!-- Coefficients table + contribution chart -->
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
           <div class="lg:col-span-3 glass-panel p-5">
-            <div class="flex items-baseline justify-between mb-3">
-              <h3 class="text-lg font-semibold text-white">Coefficients</h3>
-              <p class="text-xs text-gray-500">sorted by |mean weight|</p>
+            <div class="flex items-baseline justify-between mb-1">
+              <h3 class="text-lg font-semibold text-white">How much does each indicator move the score?</h3>
+              <p class="text-xs text-gray-500">sorted by impact size</p>
             </div>
+            <p class="text-gray-400 text-xs mb-3 leading-relaxed">
+              Each row shows one indicator's <strong class="text-white">impact weight</strong> (how many points a one-standard-deviation
+              improvement adds to the predicted score) and an <strong class="text-white">uncertainty range</strong> from re-training
+              the model on 10,000 random data slices.
+              A row is <span class="text-emerald-300">significant</span> when the range stays on one side of zero —
+              meaning we're confident the direction is right.
+            </p>
             <div id="score-model-coef-table" class="overflow-x-auto"></div>
           </div>
 
           <div class="lg:col-span-2 glass-panel p-5">
-            <div class="flex items-baseline justify-between mb-3">
-              <h3 class="text-lg font-semibold text-white">% Contribution to Score</h3>
+            <div class="flex items-baseline justify-between mb-1">
+              <h3 class="text-lg font-semibold text-white">Where does the score come from?</h3>
               <div class="flex gap-1 text-xs">
-                <button id="sm-contrib-avg" class="contrib-toggle active">All schools (avg)</button>
+                <button id="sm-contrib-avg" class="contrib-toggle active">All schools</button>
                 <button id="sm-contrib-gwu" class="contrib-toggle">GWU only</button>
               </div>
             </div>
-            <div class="perf-chart-wrap" style="height: 320px;">
+            <p class="text-gray-400 text-xs mb-3 leading-relaxed">
+              The share of the predicted score driven by each indicator.
+              <strong class="text-white">"All schools"</strong> averages across every school; <strong class="text-white">"GWU only"</strong>
+              shows what's actually moving GWU's predicted score today (positive bars helping, pink bars hurting).
+            </p>
+            <div class="perf-chart-wrap" style="height: 360px;">
               <canvas id="sm-contrib-chart"></canvas>
             </div>
             <p id="sm-contrib-caption" class="text-[11px] text-gray-500 mt-3"></p>
@@ -278,10 +294,10 @@
 
         <!-- Methodology -->
         <div class="glass-panel p-5 text-sm text-gray-300 leading-relaxed">
-          <h3 class="text-base font-semibold text-white mb-2">Methodology</h3>
+          <h3 class="text-base font-semibold text-white mb-2">Under the hood</h3>
           <p id="sm-methodology-text" class="mb-2"></p>
           <p class="text-xs text-gray-500">
-            Training years: <span id="sm-training-years">—</span> · n observations: <span id="sm-n-obs">—</span>
+            Training years: <span id="sm-training-years">—</span> · data points: <span id="sm-n-obs">—</span> school-years
           </p>
         </div>
       </div>

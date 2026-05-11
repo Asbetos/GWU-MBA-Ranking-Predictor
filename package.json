@@ -1,16 +1,16 @@
 {
-  "name": "gwu-ranking-predictor",
+  "name": "gwu-ranking-predictor-v2",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx vite --port 3000",
+    "dev": "npx vite --port 3100",
     "build": "npx vite build",
-    "preview": "npx vite preview --port 4000"
+    "preview": "npx vite preview --port 4100"
   },
-  "keywords": ["mba", "ranking", "predictor", "gwu"],
+  "keywords": ["mba", "ranking", "predictor", "gwu", "us-news", "methodology"],
   "author": "",
   "license": "ISC",
-  "description": "Interactive what-if scenario planning for US News MBA rankings",
+  "description": "Faithful US News methodology calculator + 9-feature regression for MBA ranking what-ifs (v2 of GWU Ranking Predictor).",
   "dependencies": {
     "autoprefixer": "^10.5.0",
     "chart.js": "^4.5.1",

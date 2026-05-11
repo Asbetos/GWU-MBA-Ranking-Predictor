@@ -32,10 +32,21 @@
     "label": "Avg Salary + Bonus ($)",
     "format": "dollar"
   },
+  "SalaryByProfession": {
+    "data_min": 0.39228926867216685,
+    "data_max": 1.3163850380507245,
+    "data_mean": 0.7513260903749375,
+    "data_median": 0.7417201954747392,
+    "min": 0.6,
+    "max": 1.4,
+    "step": 0.01,
+    "label": "Salary by Profession (cohort ratio)",
+    "format": "number"
+  },
   "MedianGPA": {
     "data_min": 3.1,
     "data_max": 3.8,
-    "data_mean": 3.518982073048901,
+    "data_mean": 3.518958642523636,
     "data_median": 3.5,
     "min": 3.0,
     "max": 4.0,
@@ -68,8 +79,8 @@
   "RecruiterScore": {
     "data_min": 1.8,
     "data_max": 4.6,
-    "data_mean": 3.300778749724429,
-    "data_median": 3.298095483328157,
+    "data_mean": 3.3010303963750935,
+    "data_median": 3.3,
     "min": 1.0,
     "max": 5.0,
     "step": 0.1,
@@ -77,50 +88,139 @@
     "format": "number"
   },
   "GMAT_Combined": {
-    "data_min": 0.13114754098360656,
-    "data_max": 97.51663690959259,
-    "data_mean": 50.69974345942269,
-    "data_median": 51.45533623285381,
+    "data_min": 1.7857142857142856,
+    "data_max": 95.58270676691728,
+    "data_mean": 42.81729967861706,
+    "data_median": 39.59736069237604,
     "min": 0,
     "max": 100,
     "step": 1,
-    "label": "GMAT/GRE Blended Percentile Score",
+    "label": "GMAT/GRE Blended Percentile",
     "format": "number"
   },
   "_gmat_input_config": {
     "gmat_scale_default": "old",
     "gmat_old_range": {
-      "min": 500,
+      "min": 200,
       "max": 800,
       "step": 5
     },
     "gmat_new_range": {
-      "min": 505,
+      "min": 205,
       "max": 805,
       "step": 5
     },
-    "gre_range": {
-      "min": 280,
-      "max": 340,
+    "gre_q_range": {
+      "min": 130,
+      "max": 170,
       "step": 1
     },
+    "gre_v_range": {
+      "min": 130,
+      "max": 170,
+      "step": 1
+    },
+    "gre_aw_range": {
+      "min": 0.0,
+      "max": 6.0,
+      "step": 0.5
+    },
     "gre_default_enabled": false
+  },
+  "_sbp_cohort": {
+    "Consulting": {
+      "cohort_mean": 171095.7967599411,
+      "cohort_n_total": 2037
+    },
+    "Finance / Accounting": {
+      "cohort_mean": 151540.46085672083,
+      "cohort_n_total": 2031
+    },
+    "General Management": {
+      "cohort_mean": 139047.01797175867,
+      "cohort_n_total": 779
+    },
+    "Marketing / Sales": {
+      "cohort_mean": 131544.3219047619,
+      "cohort_n_total": 1050
+    },
+    "Operations / Production": {
+      "cohort_mean": 120206.0,
+      "cohort_n_total": 431
+    },
+    "Management Information Systems (MIS)": {
+      "cohort_mean": 124329.15476190476,
+      "cohort_n_total": 84
+    },
+    "Human Resources": {
+      "cohort_mean": 100455.36842105263,
+      "cohort_n_total": 38
+    }
+  },
+  "_sbp_occupations": [
+    "Consulting",
+    "Finance / Accounting",
+    "General Management",
+    "Marketing / Sales",
+    "Operations / Production",
+    "Management Information Systems (MIS)",
+    "Human Resources"
+  ],
+  "_sbp_slider": {
+    "min": 60000,
+    "max": 260000,
+    "step": 1000,
+    "format": "dollar"
   },
   "_gwu_current": {
     "EmployedAtGrad": 0.477,
     "Employed3Mo": 0.708,
     "AvgSalaryBonus": 122929.0,
+    "SalaryByProfession": 0.6952011624267818,
     "MedianGPA": 3.3,
     "AcceptanceRate": 0.251,
     "PeerScore": 3.2,
     "RecruiterScore": 3.4,
-    "GMAT_Combined": 22.721311475409838,
-    "gmat_old": 712.6896621473993,
-    "gmat_new": 594.2556815578506,
-    "gre_total": 300.0,
+    "GMAT_Combined": 29.775201966982788,
+    "gmat_old": null,
+    "gmat_new": null,
+    "gre_q": 146.0,
+    "gre_v": 154.0,
+    "gre_aw": 4.5,
     "pct_gmat_old": 0.06,
     "pct_gmat_new": 0.03,
-    "pct_gre": 0.06
+    "pct_gre": 0.06,
+    "fulltime_enrollment": 73.0,
+    "sbp_per_occupation": {
+      "Marketing / Sales": {
+        "salary": 89500.0,
+        "n_reporting": 6.0
+      },
+      "Operations / Production": {
+        "salary": null,
+        "n_reporting": 1.0
+      },
+      "General Management": {
+        "salary": null,
+        "n_reporting": 0.0
+      },
+      "Finance / Accounting": {
+        "salary": 124000.0,
+        "n_reporting": 2.0
+      },
+      "Management Information Systems (MIS)": {
+        "salary": 107500.0,
+        "n_reporting": 2.0
+      },
+      "Consulting": {
+        "salary": 122750.0,
+        "n_reporting": 4.0
+      },
+      "Human Resources": {
+        "salary": null,
+        "n_reporting": 0.0
+      }
+    }
   },
   "_gwu_school_name": "George Washington University",
   "_gwu_current_rank": 69,
