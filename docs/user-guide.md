@@ -166,7 +166,7 @@ A short methodology blurb describing the model, the GMAT/GRE blend, and why rank
 
 # Tab 4 — Indirect Model Insights
 
-This tab has **eight cards**, one per indirect-lever model. There's one model per ranking indicator *except* Salary by Profession, which is a deterministic cohort ratio rather than a learned model. Each card has:
+This tab has **eight cards**, one per indirect-lever model. Each card has:
 
 | Element | Reads as |
 |---|---|
@@ -241,7 +241,7 @@ No. The page state is in-memory only; reloading gives you a fresh session at GWU
 
 - **Cohort** — the set of schools US News ranks in a given year (~134 schools for the 2026 edition).
 - **Coefficient / Impact weight** — how many predicted score points a one-standard-deviation change in an indicator adds.
-- **CFM (Core-Feature Model)** — an indirect-lever model that predicts one ranking indicator from non-method levers. Tab 4 shows eight of these (one per ranking indicator except Salary by Profession, which is computed deterministically).
+- **CFM (Core-Feature Model)** — an indirect-lever model that predicts one ranking indicator from non-method levers. Tab 4 shows eight of these.
 - **Confidence Interval (CI)** — a range of values; "90% CI" means 90% of the simulated outcomes fall inside the band.
 - **Monte Carlo simulation** — running the prediction many times with random noise to characterise uncertainty.
 - **Indicator / Ranking input** — one of the nine quantities US News uses to compute the overall score.

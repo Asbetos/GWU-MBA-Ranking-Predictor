@@ -402,7 +402,7 @@ Three additional artifacts live in `public/cfm_artifacts/` and feed the Lever Pr
 | `sliders.js` | Tab 1's input panel. Renders 7 simple sliders + a composite SBP control (7 industries × salary + n_reporting) + a composite GMAT/GRE control (Old/New scale toggle, optional GRE Q/V/AW). Debounces user input by 300 ms before firing the `onChange` callback. |
 | `lever-predictor.js` | Tab 2. Loads indirect-lever metadata + the 8 CFM models. On lever change, predicts all 9 core features then calls `simulateRank` on the predicted set. |
 | `score-model.js` | Tab 3. Renders the explainability artifact: performance tiles, coefficients table, contribution chart with avg / GWU-only toggle, methodology blurb. |
-| `explainability.js` | Tab 4. Renders **eight** CFM cards (one per indicator that has a learned model; Salary by Profession is deterministic and not modelled here) with confidence pills, top-coefficient bar charts, and an inline list of every feature's % contribution sorted descending. |
+| `explainability.js` | Tab 4. Renders **eight** CFM cards with confidence pills, top-coefficient bar charts, and an inline list of every feature's % contribution sorted descending. |
 | `cfm-models.js` | CFM artifact loader + JS inference. Each CFM is a small linear pipeline (impute → scale → linear → inverse target transform) over 74 features. |
 | `results.js` | Rank/score/CI/Chart.js histogram rendering used by both Tab 1 and Tab 2's sticky results panel. |
 
